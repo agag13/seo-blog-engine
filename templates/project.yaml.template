@@ -1,0 +1,53 @@
+# ─────────────────────────────────────────────────────────────
+# project.yaml — per-website configuration for the SEO blog engine
+# Copy this into a website's own project folder (NOT into the engine repo).
+# Secrets do NOT go here — put them in .env (see env.example).
+# ─────────────────────────────────────────────────────────────
+
+site:
+  name: "Example Brand"
+  url: "https://example.com"          # public site root, no trailing path
+  locale: "en-IN"                     # e.g. en-US, en-GB, en-IN
+  root_slugs: true                    # true = /slug/ , false = /blog/slug/
+
+cms:
+  type: "wordpress"                   # wordpress | strapi | ghost | markdown
+  api_base: "https://example.com/wp-json/wp/v2"
+  # WordPress: auth is an Application Password -> env WP_USER + WP_APP_PASSWORD
+  # Strapi:   collection + token       -> env STRAPI_API_TOKEN
+  default_status: "draft"             # ALWAYS draft first; a human publishes
+  # field mapping: engine field -> CMS field (override only if non-standard)
+  fields:
+    title: "title"
+    slug: "slug"
+    body_html: "content"             # WordPress: content ; Strapi: contentHtml
+    excerpt: "excerpt"
+    seo_title: "meta._yoast_wpseo_title"     # RankMath: rank_math_title
+    seo_description: "meta._yoast_wpseo_metadesc"
+    published_date: "date"
+  seo_plugin: "yoast"                 # yoast | rankmath | none  (WordPress only)
+
+authors:
+  # display name -> CMS author id (WordPress user id / Strapi author documentId)
+  "Jane Writer": 2
+  "John Editor": 3
+
+categories:                          # allowed CMS categories (ids or names)
+  - "Removal"
+  - "Reputation"
+  - "Guides"
+
+publishing:
+  cadence_new: ["Mon", "Wed", "Fri"] # new posts
+  cadence_update: ["Tue", "Thu", "Sat"]
+  time: "09:00"
+  timezone: "Asia/Kolkata"
+
+seo:
+  gsc_property: "https://example.com/"   # Search Console property (for indexing/tracking)
+  primary_market: "India"
+
+gates:
+  factcheck_required_for: ["legal", "medical", "financial"]  # topics that must pass fact-check + human/lawyer
+  human_review_owner: "Reviewer Name"
+  publish_owner: "Publisher Name"

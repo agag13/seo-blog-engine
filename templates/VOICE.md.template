@@ -1,0 +1,32 @@
+# Voice Context
+
+> Per-website file. The engine's writing skills auto-load this alongside BRAND.md.
+
+## Pronoun stance
+<e.g. "You" for the reader; "we" for the brand; never "I".>
+
+## Lexical rules
+- **Contractions**: <none | partial | full>
+- **Sentence ceiling**: <max words per sentence; vary length>
+- **Paragraph ceiling**: <max words per paragraph>
+- **Summary label**: <e.g. "Quick answer">
+
+## Headline patterns
+- **Favor**: <question headlines / outcome + specificity / real numbers>
+- **Avoid**: <clickbait / hype / "Ultimate Guide" filler / fake urgency>
+
+## Voice fingerprint (0-1 scales)
+- Funny vs serious: <0-1>
+- Formal vs casual: <0-1>
+- Respectful vs irreverent: <0-1>
+- Enthusiastic vs matter-of-fact: <0-1>
+
+## Readability target
+- Audience tier: <general | professional>
+- Flesch Grade: <e.g. 8-11>
+- Read-aloud test: if a sentence sounds like a brochure, rewrite it.
+
+## Voice signature (non-negotiable)
+- <one distinctive rule, e.g. one opinionated expert judgment per article>
+- <one honest admission of limitation per article>
+- <soft close only — the CTA style>

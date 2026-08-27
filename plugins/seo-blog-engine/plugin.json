@@ -1,0 +1,9 @@
+{
+  "name": "seo-blog-engine",
+  "version": "0.1.0",
+  "description": "Project-agnostic ORM/SEO blog engine: draft in a site's brand voice, fact-check, SEO-check, guard against cannibalization, and publish to a CMS (WordPress first). Per-project context (brand, voice, site, CMS, secrets) lives with each website, not in this plugin.",
+  "author": {
+    "name": "agag13"
+  },
+  "keywords": ["seo", "blog", "orm", "content", "wordpress", "fact-check", "publishing"]
+}

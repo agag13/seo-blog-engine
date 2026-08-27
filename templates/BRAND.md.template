@@ -1,0 +1,42 @@
+# Brand Context
+
+> Per-website file. The engine's writing/rewrite/brief/outline skills auto-load this.
+> Fill every section. Keep it honest and specific — vague brand files produce vague blogs.
+
+## Audience
+- **Primary**: <who they are, expertise level, emotional state, what problem they have>
+- **Secondary**: <secondary segment / geography>
+- **Active problems**: <the concrete situations they search for>
+- **Common misconceptions**: <what they wrongly believe, so the content can correct it>
+
+## Positioning
+- **Official entity name**: <Brand>
+- **Homepage**: <https://...>
+- **Logo**: <https://.../logo.png>
+- **sameAs profiles**: <social/profile URLs — keep the handle consistent across all>
+- **Mission**: <one sentence>
+- **Distinctive POV**: <the opinion that makes this brand different>
+- **What we are NOT**: <anti-positioning — the shortcuts/claims we refuse>
+- **Competitors**: <name — how we differ>
+
+## Editorial Rules
+### Always do
+- <e.g. open answer-first with a ~50-60 word Quick answer a snippet can lift>
+- <e.g. cite primary sources over secondary blogs>
+- <e.g. include exactly one honest admission of limitation per article>
+
+### Never do
+- <e.g. promise guaranteed outcomes / fixed timelines>
+- <e.g. invent statistics, case studies, client names>
+- <e.g. use em dashes>
+
+### Taboo phrases
+- <banned marketing/AI words and phrases, comma-separated>
+
+### Required disclosures
+- <e.g. "This is general information, not legal advice." on legal topics>
+
+## Topic Scope
+- **In scope (core pillars)**: <the 4-8 pillar topics>
+- **Partial scope**: <edge topics allowed only with a specific angle>
+- **Out of scope**: <what to refuse>

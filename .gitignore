@@ -1,0 +1,28 @@
+# ── SECRETS: never commit these ───────────────────────────────
+.env
+.env.*
+!.env.example
+*.token
+*.secret
+**/secrets/**
+credentials.json
+service-account*.json
+
+# ── Per-project context (belongs in each website's own repo, not the engine) ──
+# Uncomment if you ever keep client folders inside this repo:
+# projects/
+
+# ── Runtime / scratch ─────────────────────────────────────────
+scratch/
+tmp/
+*.log
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+
+# ── CMS payload dumps that may embed data ─────────────────────
+*.payload.json
+out/
+dist/

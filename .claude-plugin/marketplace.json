@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "seo-blog-engine",
+  "description": "A reusable, project-agnostic ORM/SEO blog engine for Claude Code. The engine (skills) stays constant; each website supplies its own brand, voice, config, and secrets.",
+  "owner": {
+    "name": "agag13"
+  },
+  "plugins": [
+    {
+      "name": "seo-blog-engine",
+      "description": "Draft, fact-check, SEO-check, and publish long-form ORM/SEO blogs to any CMS (WordPress first). Reads per-project context from the working directory; secrets stay in a gitignored .env.",
+      "author": {
+        "name": "agag13"
+      },
+      "category": "content",
+      "source": "./plugins/seo-blog-engine"
+    }
+  ]
+}
