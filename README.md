@@ -77,10 +77,11 @@ and reports a dead one rather than skipping the publish.
 1. **`research-chain`** — providers in order, recording which one answered →
 2. **SERP gate** — reject on who ranks, before a word is written →
 3. Draft (`blog-write`/`blog-rewrite`, brand voice) →
-4. **`quality-gates`** — voice, facts, links, three-surface schema. Exit 2 ends the run →
-5. Fact-check (`blog-factcheck` + `blog-researcher`) → the VERIFY + LAWYER lists →
-6. Polish (`blog-analyze`, `humanizer`, `entity-bold`, `blog-image`) →
-7. `cms-publish` → **draft** (never live).
+4. **`build_page`** — render the sibling HTML carrying the JSON-LD →
+5. **`quality-gates`** — voice, facts, links, three-surface schema. Exit 2 ends the run →
+6. Fact-check (`blog-factcheck` + `blog-researcher`) → the VERIFY + LAWYER lists →
+7. Polish (`blog-analyze`, `humanizer`, `entity-bold`, `blog-image`) →
+8. `cms-publish` → **draft** (never live).
 
 **GATE 1** the SEO owner reviews the flagged list (not the whole article). **GATE 2** the SEO
 owner approves go-live after the technical owner publishes to a temp URL. Then indexing +
@@ -91,15 +92,20 @@ owner approves go-live after the technical owner publishes to a temp URL. Then i
 The engine could always write an article and publish it. It could not stop a bad one.
 
 ```bash
+python3 .../cms-publish/scripts/build_page.py --mdx drafts/<slug>.mdx
+
 python3 .../quality-gates/scripts/run_gates.py \
-  --mdx drafts/<slug>.mdx --html out/<slug>.html \
+  --mdx drafts/<slug>.mdx --html drafts/<slug>.html \
   --serp scratch/<slug>.serp.json --keyword "<kw>"
-# 0 pass · 1 warnings, or a gate could not run · 2 blocked
+# 0 all ran and passed · 1 warnings, or a skip you named · 2 blocked, OR a gate could not run
 ```
 
 **Advisory scorers do not change behaviour.** A score of 78 reads as "good enough" and the
-article ships. Only a non-zero exit code stops it, so every gate here has one, and a gate that
-could not run is never treated as a gate that passed.
+article ships. Only a non-zero exit code stops it.
+
+**And a gate that could not run blocks.** To go on without one you have to name it,
+`--allow-skipped serp,schema`, so the decision lands in the command and in the log rather
+than in nobody's memory.
 
 ## What's in the engine
 

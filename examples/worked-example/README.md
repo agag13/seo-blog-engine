@@ -34,13 +34,27 @@ it belongs in the other file.
 
 ## Try the gates before you write anything
 
-`drafts/failing-sample.mdx` is deliberately broken. Run the gates on it:
+`drafts/failing-sample.mdx` is deliberately broken. Build it, then run the gates:
 
 ```bash
-python3 <plugin>/skills/quality-gates/scripts/run_gates.py \
+python3 <plugin>/skills/cms-publish/scripts/build_page.py \
   --project-root examples/worked-example \
   --mdx examples/worked-example/drafts/failing-sample.mdx
+
+python3 <plugin>/skills/quality-gates/scripts/run_gates.py \
+  --project-root examples/worked-example \
+  --mdx examples/worked-example/drafts/failing-sample.mdx \
+  --html examples/worked-example/drafts/failing-sample.html \
+  --allow-skipped serp
 ```
+
+`drafts/failing-sample.html` is committed so you can read it without building. **It is
+generated. Never edit it by hand.** Editing it is precisely what the schema gate exists to
+catch, which you can prove to yourself: change one FAQ answer in the HTML and re-run the
+gates. It blocks.
+
+Leave off `--allow-skipped serp` and the run blocks on that instead, because a gate that
+could not run is not a gate that passed.
 
 Expect **BLOCKED**, with roughly a dozen voice blocks and two facts blocks: an em dash, the
 brand calling itself the best, a guaranteed outcome, "alternatives to" a partner, a

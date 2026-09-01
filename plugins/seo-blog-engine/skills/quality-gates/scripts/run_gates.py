@@ -13,21 +13,34 @@ Gates, in the order they run:
     links    links_check.py   internal links resolve or are declared forward-links
     schema   schema_check.py  JSON-LD valid, FAQ byte-matched across three surfaces
 
-A gate that could not run is never treated as a gate that passed. Missing config
-raises the run to at least "incomplete", and the summary says which gate was
-blind and why.
+**A gate that could not run blocks.** It is not a gate that passed, and until v2 it
+was folded into the same exit code as "there are some warnings", which meant the
+most important gate in the set could quietly check nothing and the article shipped
+anyway.
+
+To proceed without a gate you have to name it:
+
+    --allow-skipped serp,schema
+
+There is no blanket override on purpose. Naming the gate puts the decision in the
+command and in the log, so "we shipped without the schema check" is a thing
+somebody chose rather than a thing that happened.
 
 Usage
 -----
-    python3 run_gates.py --mdx drafts/x.mdx --html out/x.html \\
+    python3 run_gates.py --mdx drafts/x.mdx --html drafts/x.html \\
                          --serp scratch/x.serp.json --keyword "what is a perp dex"
-    python3 run_gates.py --mdx drafts/x.mdx --json
+    python3 run_gates.py --mdx drafts/x.mdx --allow-skipped serp,schema --json
+
+Build the HTML first, or the schema gate has nothing to read:
+
+    python3 ../../cms-publish/scripts/build_page.py --mdx drafts/x.mdx
 
 Exit codes
 ----------
-    0   every gate that ran, passed
-    1   warnings only, or a gate could not run
-    2   at least one gate blocked. The article does not ship.
+    0   every gate ran and passed
+    1   every gate ran; warnings only, or a skip you acknowledged
+    2   a gate blocked, OR a gate could not run and was not acknowledged
 """
 from __future__ import annotations
 
@@ -39,6 +52,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PY = sys.executable or "python3"
+
+GATE_NAMES = {"serp", "voice", "facts", "links", "schema"}
 
 
 def run(name: str, script: str, args: list[str]) -> dict:
@@ -64,8 +79,20 @@ def main() -> int:
     ap.add_argument("--project-root", default=None)
     ap.add_argument("--external-links", action="store_true",
                     help="also probe outbound citations (slower)")
+    ap.add_argument("--allow-skipped", default="",
+                    help="comma-separated gate names you are knowingly running without, "
+                         "e.g. `serp,schema`. Anything not named here still blocks. There "
+                         "is deliberately no blanket override: naming the gate puts the "
+                         "decision in the command and in the log.")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
+
+    allowed = {g.strip() for g in a.allow_skipped.split(",") if g.strip()}
+    unknown = allowed - GATE_NAMES
+    if unknown:
+        print(f"--allow-skipped names a gate that does not exist: {', '.join(sorted(unknown))}. "
+              f"Known gates: {', '.join(sorted(GATE_NAMES))}.", file=sys.stderr)
+        return 2
 
     root = ["--project-root", a.project_root] if a.project_root else []
     results, skipped = [], []
@@ -85,23 +112,43 @@ def main() -> int:
         ext = ["--external"] if a.external_links else []
         results.append(run("links", "links_check.py", [a.mdx, *ext, *root]))
     else:
-        skipped.append(("voice/facts/links", "no --mdx given"))
+        for g in ("voice", "facts", "links"):
+            skipped.append((g, "no --mdx given."))
 
     if a.html:
-        results.append(run("schema", "schema_check.py", [a.html, *root]))
+        src = ["--mdx", a.mdx] if a.mdx else []
+        results.append(run("schema", "schema_check.py", [a.html, *src, *root]))
     else:
-        skipped.append(("schema", "no --html given. JSON-LD and the three-surface FAQ match "
-                                  "were not verified."))
+        skipped.append(("schema", "no --html given. Build it with cms-publish/scripts/"
+                                  "build_page.py. Without it the JSON-LD is unchecked and "
+                                  "the three-surface FAQ match, the one check that detects "
+                                  "cross-article contamination, did not run."))
 
-    worst = 0
-    for r in results:
-        worst = max(worst, min(r["code"], 2))
-    if skipped:
-        worst = max(worst, 1)
+    # A gate that could not run is not a gate that passed. It blocks unless the
+    # caller named it in --allow-skipped, which is the whole change in v2: the
+    # engine used to fold "could not run" into the same exit code as "there are
+    # warnings", and the pipeline continued on both.
+    blocked = [r["gate"] for r in results if min(r["code"], 2) == 2]
+    unacked = [g for g, _ in skipped if g not in allowed]
+    acked = [g for g, _ in skipped if g in allowed]
+
+    if blocked:
+        worst, reason = 2, "a gate blocked: " + ", ".join(blocked)
+    elif unacked:
+        worst, reason = 2, ("a gate could not run and was not acknowledged: "
+                            + ", ".join(unacked)
+                            + ". Fix it, or re-run naming it in --allow-skipped.")
+    elif any(min(r["code"], 2) == 1 for r in results) or acked:
+        worst, reason = 1, "warnings only" + (
+            ", plus acknowledged skips: " + ", ".join(acked) if acked else "")
+    else:
+        worst, reason = 0, "every gate ran and passed"
 
     if a.json:
-        print(json.dumps({"verdict": worst, "gates": results,
-                          "skipped": [{"gate": g, "why": w} for g, w in skipped]}, indent=2))
+        print(json.dumps({"verdict": worst, "verdict_reason": reason, "gates": results,
+                          "skipped": [{"gate": g, "why": w,
+                                       "acknowledged": g in allowed} for g, w in skipped]},
+                         indent=2))
         return worst
 
     print("=" * 72)
@@ -115,10 +162,15 @@ def main() -> int:
             print("\n".join("   err  " + ln for ln in r["stderr"].rstrip().splitlines()))
         print("-" * 72)
     for g, w in skipped:
-        print(f"[NOT RUN] {g}\n        {w}")
+        tag = "SKIPPED" if g in allowed else "NOT RUN"
+        print(f"[{tag}] {g}\n        {w}")
+        if g in allowed:
+            print(f"        Acknowledged via --allow-skipped. This gate checked nothing.")
         print("-" * 72)
-    print({0: "ALL GATES PASS", 1: "INCOMPLETE or WARNINGS. Read above before shipping.",
+    print({0: "ALL GATES PASS",
+           1: "PASS WITH WARNINGS. Read above before shipping.",
            2: "BLOCKED. This article does not ship."}[worst])
+    print(f"reason: {reason}")
     return worst
 
 

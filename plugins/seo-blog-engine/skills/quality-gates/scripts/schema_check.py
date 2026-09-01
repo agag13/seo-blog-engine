@@ -43,6 +43,10 @@ import site_config  # noqa: E402
 
 REPO = os.getcwd()
 SITE = ""
+# The third surface. Normally the sibling .mdx beside the .html, but a build that
+# writes into a separate output directory has to say where the source is, or the
+# one check that detects cross-article contamination silently stops running.
+MDX_OVERRIDE = ""
 
 # Types Google no longer produces rich results for. Keep them for AI extraction,
 # but do not claim a rich result. Mirrors seo-schema's classification.
@@ -168,7 +172,7 @@ def check(path: str) -> dict:
         # That happened on 2026-09-01: an .html shipped with another article's
         # eight FAQs in BOTH places and this gate returned "OK faq-match".
         # See docs/batch-3-run-2026-09-01.md section 3.
-        mdx_path = re.sub(r"\.html?$", ".mdx", str(path))
+        mdx_path = MDX_OVERRIDE or re.sub(r"\.html?$", ".mdx", str(path))
         orphans = []
         if os.path.exists(mdx_path) and mdx_path != str(path):
             mraw = open(mdx_path, encoding="utf-8", errors="replace").read()
@@ -240,13 +244,22 @@ def main() -> int:
     ap.add_argument("paths", nargs="+")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--site", default=None, help="site root URL, e.g. https://example.com")
+    ap.add_argument("--mdx", default=None,
+                    help="the source draft, when the HTML was built into a different "
+                         "directory. Without it the third-surface check falls back to "
+                         "looking for a sibling .mdx, and reports if it found none.")
     site_config.add_root_arg(ap)
     a = ap.parse_args()
 
-    global REPO, SITE
+    global REPO, SITE, MDX_OVERRIDE
     REPO = site_config.find_project_root(a.paths[0], a.project_root)
     project = site_config.load_project(REPO)
     SITE = (a.site or site_config.site_url(project)).rstrip("/")
+    MDX_OVERRIDE = os.path.abspath(a.mdx) if a.mdx else ""
+    if MDX_OVERRIDE and len(a.paths) > 1:
+        print("--mdx names one source, so it cannot be used with several HTML files.",
+              file=sys.stderr)
+        return 2
 
     worst, reports = 0, []
     for p in a.paths:

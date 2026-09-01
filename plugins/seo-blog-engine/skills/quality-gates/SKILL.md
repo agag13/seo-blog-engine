@@ -22,20 +22,35 @@ here exits 2 on a block, and `pipeline-run` fails the run rather than noting it.
 | Links | `links_check.py` | an internal link that 404s and was not declared |
 | Schema | `schema_check.py` | invalid JSON-LD, or a FAQ answer that differs across three surfaces |
 
-Run them together:
+Build the page first, then run them together:
+
+```bash
+python3 ../../cms-publish/scripts/build_page.py --mdx drafts/<slug>.mdx
+```
 
 ```bash
 python3 scripts/run_gates.py \
   --mdx drafts/<slug>.mdx \
-  --html out/<slug>.html \
+  --html drafts/<slug>.html \
   --serp scratch/<slug>.serp.json \
   --keyword "<target keyword>"
 ```
 
-Exit 0 pass, 1 warnings or a gate that could not run, 2 blocked.
+| Exit | Meaning |
+|---|---|
+| 0 | every gate ran and passed |
+| 1 | warnings only, or a skip you acknowledged |
+| 2 | a gate blocked, **or a gate could not run** |
 
-**A gate that could not run is never a gate that passed.** Missing `--serp` does not mean
-the SERP was fine; the runner reports it as NOT RUN and raises the verdict to at least 1.
+**A gate that could not run blocks.** Missing `--serp` does not mean the SERP was fine.
+
+Until v2 that was folded into exit 1 alongside ordinary warnings and the pipeline continued
+on both. Combined with the fact that nothing built the HTML, it meant the schema gate
+quietly checked nothing on every article. Both halves are fixed: `build_page.py` produces
+the file, and an unacknowledged skip now blocks.
+
+To proceed without a gate, name it: `--allow-skipped serp,schema`. Anything not named still
+blocks.
 
 ## Per-site configuration
 
@@ -99,6 +114,19 @@ spread, sat on the client's own surfaces.
 
 An internal link may 404 only if the draft's handover comment both says "forward-link" and
 names that exact path. Anything else that 404s blocks.
+
+### Building the page, `build_page.py`
+
+Reads the MDX once and renders the visible FAQ **and** the FAQPage JSON-LD from the same
+in-memory objects. Two surfaces built from one source cannot disagree.
+
+This changes what the schema gate is for. It used to be the only thing standing between us
+and a mismatch. Now it is a regression test that catches drift introduced afterwards by a
+hand edit, which is a smaller and more honest job for it.
+
+Output goes beside the MDX by default, because the third-surface check finds the source by
+looking for a sibling `.mdx`. If you build into a separate directory, pass `--mdx` to
+`schema_check.py` so that check still runs.
 
 ### Schema, `schema_check.py`, and the three surfaces
 

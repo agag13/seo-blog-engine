@@ -42,6 +42,7 @@ Stdlib only.
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import os
 import re
@@ -248,12 +249,38 @@ def analyse(keyword: str, items: list[dict], partners: list[str],
     return {"keyword": keyword, "results": rows, "findings": findings, "verdict": verdict}
 
 
+def staleness(path: str, warn_days: int, block_days: int):
+    """A saved SERP is a photograph, and it ages.
+
+    Stored keyword data is a candidate list, not a data source. On the reference
+    account, four of four keywords re-pulled after three weeks carried at least
+    one wrong figure and every single error flattered the keyword. The cause is a
+    trailing twelve-month average taken across a spike, so the stored number is
+    not slightly old, it is describing a different world.
+    """
+    age = (datetime.datetime.now()
+           - datetime.datetime.fromtimestamp(os.path.getmtime(path))).days
+    if age >= block_days:
+        return {"severity": "REJECT", "rule": "serp-stale",
+                "message": f"This SERP was saved {age} days ago. Past {block_days} days it "
+                           f"is not evidence about today's SERP. Re-pull it."}
+    if age >= warn_days:
+        return {"severity": "WARN", "rule": "serp-ageing",
+                "message": f"This SERP was saved {age} days ago. Re-pull at brief time; "
+                           f"rankings and the AI Overview move faster than this."}
+    return None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("serp_json", help="saved SERP response (DataForSEO envelope or plain list)")
     ap.add_argument("--keyword", default=None)
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--max-age-warn", type=int, default=7,
+                    help="warn when the saved SERP is older than this many days (default 7)")
+    ap.add_argument("--max-age-block", type=int, default=21,
+                    help="reject when the saved SERP is older than this (default 21)")
     site_config.add_root_arg(ap)
     a = ap.parse_args()
 
@@ -273,6 +300,13 @@ def main() -> int:
     kw_from_file, items = load_results(a.serp_json)
     rep = analyse(a.keyword or kw_from_file or "", items, partners,
                   ai_overview_domains(a.serp_json))
+    stale = staleness(a.serp_json, a.max_age_warn, a.max_age_block)
+    if stale:
+        rep["findings"].insert(0, stale)
+        if stale["severity"] == "REJECT":
+            rep["verdict"] = 2
+        else:
+            rep["verdict"] = max(rep["verdict"], 1)
 
     if a.json:
         print(json.dumps(rep, indent=2))

@@ -8,9 +8,13 @@ description: Push a finished, gate-passed article to its destination as a DRAFT.
 **One rule that never bends: publish as a draft.** Going live is a human action, in the CMS,
 by a person who looked at the page. That rule was already here and it stays.
 
-**Second rule, new: the gates run first.** `run_gates.py` must exit 0 or 1 before this skill
-does anything. A gate that could not run is not a gate that passed, and a run at verdict 2
-does not reach this step at all.
+**Second rule: the gates run first.** `run_gates.py` must exit 0 or 1 before this skill does
+anything. A verdict of 2 does not reach this step, and since v2 that includes a gate that
+could not run.
+
+**Third rule: build before you gate.** `build_page.py` produces the sibling HTML carrying
+the JSON-LD. Without it the schema gate has nothing to read, which is not the same as the
+schema being fine.
 
 ## Which target
 
@@ -25,10 +29,12 @@ Read `project.yaml → cms.type`.
 ## Target 1, code-based sites (Next.js, Astro, Hugo, Eleventy)
 
 ```bash
+python3 scripts/build_page.py       --mdx drafts/<slug>.mdx
 python3 scripts/markdown_publish.py --mdx drafts/<slug>.mdx --out <site>/content/blog
 ```
 
-It writes **two** files:
+`build_page.py` generates the HTML; `markdown_publish.py` moves the pair into the site,
+writing **two** files:
 
 - `<slug>.mdx`, the article source with frontmatter intact
 - `<slug>.html`, the sibling carrying the JSON-LD and the visible FAQ

@@ -154,3 +154,24 @@ def context_file(root: str, name: str) -> str | None:
 def add_root_arg(ap) -> None:
     ap.add_argument("--project-root", default=None,
                     help="site folder holding project.yaml. Default: walk up from the target file.")
+
+
+# --------------------------------------------------------------------------- drafts
+
+def frontmatter(raw: str) -> tuple:
+    """Split a draft into (frontmatter dict, body). Lives here so the builder and
+    the publisher read a draft the same way; two parsers would eventually differ,
+    and a difference between them is a difference between surfaces.
+
+    Scalars only, which is all the house frontmatter uses. A list value is kept
+    as its raw string rather than half-parsed into something misleading.
+    """
+    m = re.match(r"(?s)\A---\n(.*?)\n---\n?(.*)\Z", raw)
+    if not m:
+        return {}, raw
+    fm = {}
+    for line in m.group(1).splitlines():
+        mm = re.match(r"^([A-Za-z_][\w-]*):\s*(.*)$", line)
+        if mm:
+            fm[mm.group(1)] = mm.group(2).strip().strip('"\'')
+    return fm, m.group(2)

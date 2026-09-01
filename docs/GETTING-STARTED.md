@@ -159,6 +159,10 @@ article, and one of the gates is standing there with nothing to compare against.
 the failure mode this whole setup exists to prevent, so read the warnings rather than
 noting the article came out fine.
 
+One thing to know before the first run: **a gate that could not run stops the pipeline.**
+If the report says NOT RUN, that is a failure and not a note. Either give the gate what it
+needs, or name it in `--allow-skipped` so the decision is on the record.
+
 Then, for the first article:
 
 ```

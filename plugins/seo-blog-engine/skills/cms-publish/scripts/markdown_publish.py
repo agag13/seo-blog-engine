@@ -31,21 +31,14 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import shutil
 import sys
 
-
-def frontmatter(raw: str) -> tuple[dict, str]:
-    m = re.match(r"(?s)\A---\n(.*?)\n---\n?(.*)\Z", raw)
-    if not m:
-        return {}, raw
-    fm = {}
-    for line in m.group(1).splitlines():
-        mm = re.match(r"^([A-Za-z_][\w-]*):\s*(.*)$", line)
-        if mm:
-            fm[mm.group(1)] = mm.group(2).strip().strip('"\'')
-    return fm, m.group(2)
+HERE = os.path.dirname(os.path.abspath(__file__))
+GATES = os.path.abspath(os.path.join(HERE, "..", "..", "quality-gates", "scripts"))
+if GATES not in sys.path:
+    sys.path.insert(0, GATES)
+from site_config import frontmatter  # noqa: E402
 
 
 def main() -> int:
@@ -64,7 +57,7 @@ def main() -> int:
         return 2
 
     raw = open(a.mdx, encoding="utf-8", errors="replace").read()
-    fm, _ = frontmatter(raw)
+    fm, _ = frontmatter(raw)   # shared with build_page, so both read a draft alike
     slug = a.slug or fm.get("slug") or os.path.splitext(os.path.basename(a.mdx))[0]
 
     warnings = []
@@ -76,8 +69,9 @@ def main() -> int:
     html_src = a.html or (os.path.splitext(a.mdx)[0] + ".html")
     have_html = os.path.exists(html_src)
     if not have_html:
-        warnings.append(f"no sibling HTML at {html_src}. The JSON-LD and the three-surface "
-                        f"FAQ match cannot be verified for this article.")
+        warnings.append(f"no sibling HTML at {html_src}. Build it first with "
+                        f"build_page.py, or the JSON-LD and the three-surface FAQ match "
+                        f"were never verified for this article.")
 
     os.makedirs(a.out, exist_ok=True)
     written = []

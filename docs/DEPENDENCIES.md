@@ -31,5 +31,8 @@ Copy the MIT-licensed `blog-*` / `seo-*` / `diagram-design` skill folders into
 attribution**. Do NOT vendor the marketplace (non-MIT) skills — reference those.
 
 ## Runtime
-- Python 3.11+ (publishing scripts, quality scoring)
+- Python 3.9+ (verified on 3.9.6; 3.11 preferred). The gate scripts are stdlib-only.
+- **PyYAML** (`pip3 install pyyaml`). Without it the voice gate cannot read the
+  fingerprint and falls back to built-in bands. It prints that it did, so it is not
+  silent, but bands nobody measured pass almost anything.
 - `requests` is optional — the WordPress adapter uses only the Python standard library.

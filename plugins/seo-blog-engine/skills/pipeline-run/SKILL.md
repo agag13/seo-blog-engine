@@ -63,24 +63,44 @@ block into two live articles.
 If the article carries a diagram, the information the diagram argues must also exist as
 prose or a table. **An SVG's content is invisible to answer engines.**
 
-## 4. The enforcement gates
+## 4. Build the page
+
+The schema gate reads an HTML file, so one has to exist. Build it from the draft:
+
+```bash
+python3 cms-publish/scripts/build_page.py --mdx drafts/<slug>.mdx
+```
+
+That writes `drafts/<slug>.html` beside the source, carrying the visible FAQ and the
+JSON-LD. **Both are generated from one parse of the MDX**, so they cannot disagree with
+each other, and the filename comes from the source rather than from an argument, so a
+build cannot be pointed at a sibling article's file.
+
+Skipping this step is how the strongest gate in the engine ends up checking nothing.
+
+## 5. The enforcement gates
 
 ```bash
 python3 quality-gates/scripts/run_gates.py \
-  --mdx drafts/<slug>.mdx --html out/<slug>.html \
+  --mdx drafts/<slug>.mdx --html drafts/<slug>.html \
   --serp scratch/<slug>.serp.json --keyword "<kw>"
 ```
 
 | Exit | Meaning | What happens |
 |---|---|---|
-| 0 | every gate that ran, passed | continue |
-| 1 | warnings, or a gate could not run | continue, and put every warning in the REVIEW list |
-| 2 | a gate blocked | **the run fails here.** Fix and re-run the gates |
+| 0 | every gate ran and passed | continue |
+| 1 | warnings only, or a skip you acknowledged | continue, and put the warnings in the REVIEW list |
+| 2 | a gate blocked, **or a gate could not run** | **the run fails here** |
+
+**A gate that could not run blocks.** To go on without one you have to name it:
+`--allow-skipped serp,schema`. There is no blanket override. Naming the gate puts the
+decision in the command and in the log, so "we shipped without the schema check" is
+something a person chose rather than something that happened.
 
 **Re-run the gates after the final edit, never before.** The three-surface FAQ match verified
 before the last edit means nothing after it.
 
-## 5. Fact-check and polish
+## 6. Fact-check and polish
 
 `blog-factcheck` with the `blog-researcher` agent. Split into auto-cleared, a **VERIFY** list,
 and a **LAWYER** list for topics in `project.yaml → gates.factcheck_required_for`.
@@ -92,7 +112,7 @@ not evidence.
 Then `blog-analyze`, `entity-bold`, and `blog-image` if images are enabled. These are
 advisory and they are allowed to be, because the blocking work already happened.
 
-## 6. Publish as a draft
+## 7. Publish as a draft
 
 `cms-publish`. Code-based site or WordPress, draft only, and check the MCP server connects
 before claiming a WordPress publish happened.
@@ -110,6 +130,8 @@ Live QA, then `request-indexing` and log with `tracker-gen`.
 - Never skip intake.
 - Never write an article whose SERP gate exited 2.
 - Never set a CMS status to `publish`.
-- Never treat a gate that could not run as a gate that passed.
+- Never treat a gate that could not run as a gate that passed. `--allow-skipped` records a
+  decision; it is not a way past a red light.
+- Never hand-edit the built HTML. Edit the MDX and rebuild. The gate will catch you.
 - Never report a figure without the provider that answered for it.
 - One article per run.

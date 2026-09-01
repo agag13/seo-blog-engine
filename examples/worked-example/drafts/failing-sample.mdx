@@ -1,5 +1,9 @@
 ---
 title: "Meridian is the best scheduling tool for operations teams"
+description: "A deliberately broken sample draft, used to demonstrate what the enforcement gates block and why each rule exists."
+pubDate: "2026-09-01"
+cover: "https://example.com/img/failing-sample.jpg"
+author: "Sample Author"
 slug: failing-sample
 draft: true
 ---
@@ -29,3 +33,14 @@ The iOS app gives you the same scheduling controls on the go.
 ## What we cannot do
 
 We do not fit teams under twenty people.
+
+## Scheduling migration: FAQ
+
+**How long does a scheduling migration take?**
+Most teams finish the data import in a day and then run both systems for two weeks. The import is rarely the hard part. The two weeks afterwards are, because that is when the two systems drift and somebody has to reconcile them by hand.
+
+**Can we roll back if it goes wrong?**
+Yes, for as long as the old system is still running. Once it is switched off, a rollback means restoring from an export, which is slower and loses anything entered since.
+
+**What happens to historical shift records?**
+They import as read-only records. Editing history is deliberately not supported, because an audit trail you can edit is not an audit trail.
