@@ -37,8 +37,8 @@ this from inside that website's own folder (its own git repo), never inside the 
    | `config/voice-fingerprint.yaml` | `voice-fingerprint.yaml.template` | the measured bands. **The gate** |
    | `.env.example` | `env.example` | copy to `.env` and fill. NEVER write real secrets here |
 
-   `examples/nika/` in the engine repo holds filled-in `PARTNERS.md` and `FACTS.md` from a
-   real account. Read those for the shape before writing a new one.
+   `examples/worked-example/` in the engine repo holds a complete filled-in context.
+   Read it for the shape before writing a new one.
 
 4. **Interview for the two context files**, because they cannot be inferred:
    - **Partners.** "Who do you work with that we must never write competitively about?"

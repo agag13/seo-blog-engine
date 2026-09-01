@@ -1,0 +1,127 @@
+# Voice fingerprint, worked example. Fictional brand, illustrative numbers.
+#
+# Every number below is supposed to be MEASURED from text the client already
+# published. These were not; they are here to show the shape. A real one records
+# how it was computed and from what, so anyone can reproduce it.
+#
+# Why this file exists rather than a paragraph in VOICE.md: prose guidance does
+# not work, because a model reads past it. A number fails.
+
+schema_version: 1
+active: house-article
+extracted_at: "2026-08-20"
+refresh_due: "2026-11-18"      # 90 days. A stale fingerprint is a stale gate.
+
+profiles:
+
+  # =======================================================================
+  house-article:
+    profile_id: house-article
+    register: casual-professional
+    intent: [seo-articles, guides, comparisons]
+    sample_count: 14
+    sample_word_count: 21400
+    sentence_count: 1680
+    paragraph_count: 690
+    source: "the client blog, 14 posts, fetched 2026-08-20"
+
+    cadence:
+      sentence_length:
+        mean: 13.4
+        median: 12
+        p10: 5
+        p90: 25
+        stdev: 7.8
+        length_cv: 0.582
+        short_sentence_frequency: 0.318    # under 8 words
+        long_sentence_frequency: 0.052     # over 25 words
+        length_cv_floor: 0.50              # below this, sentences are too uniform
+      paragraph_length:
+        mean_sentences: 2.4
+        mean_words: 32.1
+        one_sentence_paragraph_frequency: 0.34   # the band that matters most
+        max_words: 70                            # hard ceiling. Blocks above it
+      rhythm_signature: short-burst
+
+    mechanics:
+      contraction_rate: 0.41       # of contractible pairs
+      em_dash_usage: never         # `never` makes any em dash a BLOCK
+
+    lexical:
+      mattr_floor: 0.78
+
+    idioms:
+      signature_phrases:
+        - "the honest version"
+        - "which is the part nobody tells you"
+
+  # A second register. NEVER average two registers into one profile; the average
+  # describes nobody. Selected by mode: guest posts and bylines use this one.
+  founder-essay:
+    profile_id: founder-essay
+    register: conversational
+    intent: [guest-posts, bylines, social]
+    sample_count: 11
+    sample_word_count: 7100
+    source: "founder's published essays, fetched 2026-08-20"
+    cadence:
+      sentence_length: {mean: 11.2, p90: 21, length_cv: 0.63, length_cv_floor: 0.55}
+      paragraph_length: {one_sentence_paragraph_frequency: 0.42, max_words: 70}
+    mechanics: {contraction_rate: 0.49, em_dash_usage: never}
+    lexical: {mattr_floor: 0.78}
+
+# Words this client bans that the engine's global AI-slop list does not cover.
+banned_words_user_specific:
+  - "solution"          # this client sells a product, not a solution
+  - "effortless"
+
+# Brand rules the engine cannot possibly know. Each entry blocks unless it
+# declares `severity: warn`, which is right for the ones that are judgment
+# calls. A gate that blocks on a judgment call gets switched off, and then it
+# blocks nothing at all.
+banned_structures:
+  - id: never-the-best
+    pattern: "(?i)\\bMeridian is (?:the )?(?:best|leading|top|#1|number one)\\b"
+    why: "One honest option among several. BRAND.md."
+    severity: block
+
+  - id: guaranteed-outcome
+    pattern: "(?i)\\b(?:guarantee[sd]?|guaranteed)\\s+(?:results?|uptime|savings?|roi)\\b"
+    why: "No promised outcomes. BRAND.md, and legal."
+    severity: block
+
+  - id: partner-as-target
+    pattern: "(?i)\\b(?:northwind data|calyx systems)\\s+(?:alternatives?|competitors?)\\b"
+    why: >-
+      Partners are never comparison targets. PARTNERS.md. The gate also derives
+      this from PARTNERS.md directly, so this entry is belt and braces for the
+      phrasings a heading might use.
+    severity: block
+
+  - id: numbers-in-headline
+    pattern: "^#{1,2} .*\\d{2,}"
+    why: >-
+      No hard numbers in headlines unless the body immediately supports them.
+      A year in an H1 is the exception, so this warns rather than blocks.
+    severity: warn
+
+  - id: wall-paragraph
+    pattern: null
+    why: "Any paragraph over 70 words. Measured, not regex. Split it."
+    severity: warn
+    threshold: "70 words"
+
+# A list-shaped part of the domain that copy drifts into enumerating. Two or more
+# in one draft warns. Empty disables the check.
+enumeration_watch: ["salesforce", "workday", "bamboohr", "gusto", "rippling"]
+
+extraction:
+  extractor_version: "voice-extractor lenses, computed locally"
+  method: >-
+    Burrows's Delta function-word vector, sentence-length burstiness, MATTR
+    lexical diversity, punctuation rates, opener profile. Corpus fetched from
+    the live site, stripped of nav, footer, code fences and inline SVG before
+    measuring.
+  warnings:
+    - "sample_word_count is on the low side for the founder-essay profile. Treat its bands as provisional."
+  confidence: medium

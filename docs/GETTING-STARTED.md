@@ -69,9 +69,14 @@ another neither. If it does not answer, **the publish stops and says which serve
 It never silently skips the publish step, because an article that quietly did not publish
 is worse than one that failed loudly. Nobody goes looking for the quiet one.
 
-For reference, on 2026-09-01: `novamira-blockchainpress` answered (WordPress 7.1, PHP
-8.2.29, Rank Math active). `novamira-fameninja-com` and `novamira-project-1-local` both
-failed to connect. That is a snapshot, not a fact about the engine. Re-check at run time.
+This is not hypothetical. On the machine this was built on, three Novamira servers were
+configured and **one answered, two did not**, one of them `ENOTFOUND`. That is normal, not
+an incident: each site has its own, and some are local or retired. The one that answered
+reported WordPress 7.1, PHP 8.2.29 and Rank Math active, which is how the engine knew to
+write Rank Math fields rather than Yoast ones.
+
+Re-check at run time, every time. A server that answered last week is not evidence about
+today.
 
 Code-based sites (Next.js, Astro) need **no** MCP connection at all. They get files written
 into the repo, uncommitted.
@@ -104,9 +109,10 @@ automated, because it is all information the client has and the engine does not.
 | `FACTS.md` | you, by auditing the client's own surfaces | every product claim ships unchecked |
 | `.env` | whoever holds the credentials | direct API calls fail; MCP calls still work |
 
-`examples/nika/` in this repo is a complete filled-in set from a real account. Read it
-before writing a new one. It is the fastest way to see the level of specificity that
-actually changes a draft.
+`examples/worked-example/` in this repo is a complete filled-in set. Read it before
+writing a new one. It is the fastest way to see the level of specificity that actually
+changes a draft, and its own README explains why `doctor.py` deliberately reports it as
+not-ready.
 
 ### The three that people skip, and what skipping each one costs
 

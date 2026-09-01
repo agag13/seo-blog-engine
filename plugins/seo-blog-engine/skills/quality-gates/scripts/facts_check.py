@@ -70,7 +70,10 @@ def parse_facts(path: str) -> list[dict]:
         m = re.match(r"^\s*[-*]\s*(status|source|guard)\s*:\s*(.+?)\s*$", line, re.I)
         if m:
             cur[m.group(1).lower()] = m.group(2).strip().strip("`")
-    return facts
+    # A FACTS.md carries prose headings too, for the statuses table and the notes
+    # on writing a guard. A heading with no `status:` under it is not a fact, and
+    # reporting it as one buries the real findings in noise.
+    return [f for f in facts if f.get("status")]
 
 
 def check(path: str, facts: list[dict]) -> dict:

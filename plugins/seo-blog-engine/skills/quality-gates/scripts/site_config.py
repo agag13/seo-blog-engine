@@ -11,7 +11,8 @@ the first one that answers wins:
     4.  walk up from the file being checked, looking for .git
     5.  the current working directory
 
-The old Nika scripts computed the repo root from __file__ with four os.pardir
+The scripts this engine inherited computed the repo root from __file__ with four
+os.pardir
 hops. That is the bug that made the batch-3 regression test invalid: run the
 script from anywhere else and the fingerprint path silently broke, so the gate
 compared against built-in defaults while appearing to pass. Resolution now

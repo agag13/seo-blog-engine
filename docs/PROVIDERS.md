@@ -10,7 +10,7 @@ What is connected, what answers, and what is broken in a way that waiting will n
 |---|---|---|
 | **DataForSEO** | MCP, `mcp__claude_ai_dataforseo__*` | live `serp_organic_live_advanced` pull for `coinbase perpetual futures`, en / United States. Returned the full SERP plus the AI Overview and its citations |
 | **Tavily** | MCP, `mcp__claude_ai_Tavily__*` | `tavily_search`, `tavily_extract`, `tavily_crawl`, `tavily_map`, `tavily_research`. **The only route for geo-specific search**, since built-in WebSearch is US-only |
-| **Novamira WordPress** | MCP, `novamira-blockchainpress` | `mcp-adapter-discover-abilities` answered: WordPress 7.1, PHP 8.2.29, Rank Math active, `create-post` / `update-post` available |
+| **Novamira WordPress** | MCP, one server **per site** | `mcp-adapter-discover-abilities` answered on the site tested: WordPress 7.1, PHP 8.2.29, Rank Math active, `create-post` / `update-post` available |
 
 DataForSEO did most of the work on the reference account.
 
@@ -36,11 +36,15 @@ The connected account is on the **free plan**. This returned 403 on 2026-08-31 a
 funding the account, authorising the Ahrefs connector, or buying the Ahrefs seat that has
 been pending since August.
 
-### Novamira, the other two servers
+### Novamira, the servers that do not answer
 
-`novamira-fameninja-com` and `novamira-project-1-local` both **fail to connect**
-(`ENOTFOUND` on the second). Check with `mcp-adapter-discover-abilities` before publishing,
-and report a dead server rather than skipping the publish step.
+Of three Novamira servers configured on the machine this was built on, **two failed to
+connect**, one with `ENOTFOUND`. Each site has its own server, so this is normal and
+permanent rather than an incident: some sites are local, some are retired, some were never
+finished.
+
+Check with `mcp-adapter-discover-abilities` before publishing, and **report a dead server
+rather than skipping the publish step.**
 
 ## What this costs, stated plainly
 

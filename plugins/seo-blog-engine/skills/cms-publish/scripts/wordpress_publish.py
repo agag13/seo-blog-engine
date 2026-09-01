@@ -29,7 +29,7 @@ def md_to_html(md):
     md = md.replace("\r\n", "\n")
     # strip a leading H1 (WordPress uses the post title for H1) and any '## JSON-LD'/checklist tail
     md = re.sub(r"^#\s+.*\n", "", md, count=1)
-    for marker in ["\n## JSON-LD", "\nFameNinja content quality checklist"]:
+    for marker in ["\n## JSON-LD", "\n## Content quality checklist"]:
         i = md.find(marker)
         if i != -1:
             md = md[:i]

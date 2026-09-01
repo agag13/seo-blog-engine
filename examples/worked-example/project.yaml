@@ -1,0 +1,40 @@
+# Worked example. Copy the shape; replace every value.
+
+site:
+  name: "Meridian"
+  url: "https://example.com"        # the real site root. No trailing path
+  locale: "en-US"
+  root_slugs: false                 # false = /blog/slug/ , true = /slug/
+
+cms:
+  type: "markdown"                  # markdown (code-based site) | wordpress
+  default_status: "draft"           # ALWAYS draft. A human publishes
+  output_dir: "content/blog"        # markdown target only
+
+  # WordPress target instead? Point at THIS site's own MCP server. Every site has
+  # its own; there is no shared one. The engine checks at run time whether it
+  # answers, and reports a dead server rather than skipping the publish.
+  # mcp_server: "novamira-<this-site>"
+
+voice:
+  fingerprint: "config/voice-fingerprint.yaml"
+  profile_inhouse: "house-article"
+  profile_guest: "founder-essay"
+
+context:
+  partners: "PARTNERS.md"
+  facts: "FACTS.md"
+
+seo:
+  gsc_property: "https://example.com/"
+  primary_market: "United States"
+  # Markets this client cannot address. Intake and the SERP work read this.
+  excluded_markets: []
+
+gates:
+  factcheck_required_for: ["legal", "medical", "financial"]
+  serp_gate: required
+  voice_gate: required
+  facts_gate: required
+  human_review_owner: "<name>"
+  publish_owner: "<name>"

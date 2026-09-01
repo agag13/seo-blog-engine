@@ -16,7 +16,7 @@ writes, fact-checks, SEO-checks, and publishes in that site's voice to that site
 this repo (the ENGINE — installed once)      each website (the CONTEXT — its own repo)
   plugins/seo-blog-engine/skills/*             BRAND.md       audience, honesty rules
   templates/*                                  VOICE.md       tone, headline rules
-  examples/nika/  a filled-in worked example   PARTNERS.md    never write against these
+  examples/worked-example/  a filled-in one    PARTNERS.md    never write against these
   docs/DEPENDENCIES.md                         FACTS.md       every fact + status + source
   docs/PROVIDERS.md                            project.yaml   site · CMS · gates
                                                config/voice-fingerprint.yaml  measured bands
@@ -31,7 +31,7 @@ EVIDENCED, BETA, CONFLICTED or NOT PUBLISHED, and the last two block.
 > **Setting this up for a team? Start at [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md).**
 > It is the complete list: what each person installs, which MCP servers are shared and which
 > are per website, what the client has to supply, and how to check the setup before the first
-> run. `examples/nika/` is a filled-in worked example of one site's context.
+> run. `examples/worked-example/` is a complete filled-in site context.
 
 ## Install (each teammate, once)
 

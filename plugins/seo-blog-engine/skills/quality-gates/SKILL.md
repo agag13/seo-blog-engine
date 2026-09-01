@@ -50,7 +50,7 @@ that is how a gate silently compares against built-in defaults while appearing t
 | `PARTNERS.md` | voice, serp | the partner check does not run, and prints that it did not |
 | `FACTS.md` | facts | exit 1 with "every product claim in this draft is unchecked" |
 
-Worked examples for a real account: `examples/nika/`.
+A complete filled-in example: `examples/worked-example/`.
 
 ## Why each gate exists
 

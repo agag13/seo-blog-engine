@@ -50,18 +50,15 @@ as this script is.
 
 ### Check which server connects, at runtime, before publishing
 
-There are several Novamira MCP servers configured and **they are not all up**. As of
-2026-09-01, verified by calling each:
+**Every site has its own Novamira server**, so a machine usually has several configured and
+**they are not all up**. That is normal rather than an incident: some are local, some are
+retired. When this was built, three were configured and only one answered; the other two
+failed to connect, one with `ENOTFOUND`.
 
-| Server | State |
-|---|---|
-| `novamira-blockchainpress` | **connects.** WordPress 7.1, PHP 8.2, Rank Math active |
-| `novamira-fameninja-com` | fails to connect |
-| `novamira-project-1-local` | fails to connect, `ENOTFOUND` |
-
-So: call `mcp-adapter-discover-abilities` on the intended server first. If it answers, the
-server is live and the ability list tells you what this particular site supports, which
-differs per install.
+So: call `mcp-adapter-discover-abilities` on **the server this site's `project.yaml` points
+at**, before anything else. If it answers, that server is live, and the ability list tells
+you what this particular install supports, which genuinely differs: one site runs Rank Math,
+another Yoast, another neither.
 
 **A dead server is reported, never skipped.** Say which server, say what the failure was,
 and stop. Do not fall back to a different site's server, and do not carry on to the next

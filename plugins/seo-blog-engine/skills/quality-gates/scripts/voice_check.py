@@ -24,10 +24,11 @@ Exit codes
     2   at least one BLOCK, the draft does not ship
 
 Blocks are voice-rules.md violations and hard AI tells. Warnings are cadence
-drift against the fingerprint bands. The article-register bands are
-deliberately *corrective*: they sit between the shipped corpus and Daniel's
-own essays, so an existing article warning on cadence is the tool working, not
-a false positive. See the header of config/voice-fingerprint.yaml.
+drift against the fingerprint bands. A site's article-register bands are
+often deliberately *corrective*: set between the corpus that shipped and the
+voice the client actually wants, so an existing article warning on cadence is
+the tool working rather than a false positive. Record that in the fingerprint's
+own header, per site.
 
 Stdlib only, so the gate never fails on a missing dependency.
 """
@@ -357,8 +358,8 @@ def check(path: str, fp: dict, partner_re=None) -> list[dict]:
     if walls:
         add("WARN", "wall-paragraph",
             f"{len(walls)} paragraph(s) over {fp['para_max_words']} words "
-            f"({100 * len(walls) / len(paras):.0f}% of the draft). Daniel's essays have one "
-            f"in 297. Split them.", None, walls[0][:90])
+            f"({100 * len(walls) / len(paras):.0f}% of the draft), against a ceiling of "
+            f"{fp['para_max_words']} words. Split them.", None, walls[0][:90])
 
     if abs(mean - fp["cadence_mean"]) / fp["cadence_mean"] > 0.40:
         add("WARN", "cadence_mean_drift",
@@ -383,7 +384,7 @@ def check(path: str, fp: dict, partner_re=None) -> list[dict]:
         if rate < fp["contraction_rate"] * 0.5:
             add("WARN", "contraction_rate_drop",
                 f"Contractions {100 * rate:.0f}% of contractible pairs vs target "
-                f"{100 * fp['contraction_rate']:.0f}%. Reads more formal than Daniel.")
+                f"{100 * fp['contraction_rate']:.0f}%. Reads more formal than the corpus.")
 
     toks = re.findall(r"[a-z']+", body.lower())
     if len(toks) >= 200:
