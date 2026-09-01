@@ -1,0 +1,59 @@
+# Product facts
+
+Every product fact this site may state, with a status and a source.
+
+**Why this file exists.** A leverage figure nearly published while four contradictory
+versions of it sat on the client's own surfaces, an 8x spread across a blog post, a
+product page, a docs site, and that product page's own meta description. Nobody was
+careless. The number was in the brief and nothing said no.
+
+`facts_check.py` reads this file and blocks any draft that states a CONFLICTED or
+NOT PUBLISHED fact.
+
+## Statuses
+
+| Status | Means | Publishable |
+|---|---|---|
+| `EVIDENCED` | a named source states it, and the source is linked | yes |
+| `BETA` | true, but only publishable with the beta qualifier attached | yes, qualified |
+| `CONFLICTED` | the client's own surfaces disagree with each other | **no**, until reconciled |
+| `NOT PUBLISHED` | nobody has stated it publicly | **no**. An article stating it would be the first public statement, which is a legal decision, not an editorial one |
+
+## Format
+
+One fact per `## heading`, then three fields. The `guard` is a regex; a draft matching the
+guard of a non-publishable fact is blocked, and the block message quotes the source.
+
+```
+## Maximum leverage
+- status: CONFLICTED
+- source: four figures across four client surfaces, escalated YYYY-MM-DD
+- guard: (?i)\b(up to\s*)?\d{2,3}\s*x\s+leverage\b
+```
+
+Write the guard to match the *claim*, not the exact sentence. A guard that only matches one
+phrasing will be walked around by the next draft.
+
+A fact with no `guard` is documentation, not a gate, and `facts_check.py` says so rather
+than passing it silently.
+
+---
+
+## Example fact, safe to publish
+
+- status: EVIDENCED
+- source: <where it is stated, with a URL or a doc path and the date it was read>
+- guard: (?i)\bthe exact claim, as a regex\b
+
+## Example fact, blocked
+
+- status: NOT PUBLISHED
+- source: <what you checked, and what you found, which was nothing>
+- guard: (?i)\bthe claim nobody has made yet\b
+
+---
+
+**Last reconciled against client surfaces:** YYYY-MM-DD
+
+Product facts drift. Re-read the client's live surfaces at brief time for any fact the
+article leans on, exactly as the keyword board is re-pulled at brief time.

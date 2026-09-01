@@ -13,12 +13,20 @@ its `BRAND.md`, `VOICE.md`, `project.yaml`, and a gitignored `.env`, and the sam
 writes, fact-checks, SEO-checks, and publishes in that site's voice to that site's CMS.
 
 ```
-this repo (the ENGINE — installed once)            each website (the CONTEXT — its own repo)
-  plugins/seo-blog-engine/skills/*                   BRAND.md      audience, honesty rules
-  templates/*   project.yaml / BRAND / VOICE / env   VOICE.md      tone, headline rules
-  docs/DEPENDENCIES.md                               project.yaml  site · CMS · GSC · cadence
-                                                     .env          secrets — GITIGNORED
+this repo (the ENGINE — installed once)      each website (the CONTEXT — its own repo)
+  plugins/seo-blog-engine/skills/*             BRAND.md       audience, honesty rules
+  templates/*                                  VOICE.md       tone, headline rules
+  examples/nika/  a filled-in worked example   PARTNERS.md    never write against these
+  docs/DEPENDENCIES.md                         FACTS.md       every fact + status + source
+  docs/PROVIDERS.md                            project.yaml   site · CMS · gates
+                                               config/voice-fingerprint.yaml  measured bands
+                                               .env           secrets — GITIGNORED
 ```
+
+Two of those context files are new and they carry the rules the engine cannot infer.
+**`PARTNERS.md`** is parsed, not read: a prose honesty rule does not stop an agent writing
+"alternatives to X" about a partner. **`FACTS.md`** gives every product claim a status of
+EVIDENCED, BETA, CONFLICTED or NOT PUBLISHED, and the last two block.
 
 ## Install (each teammate, once)
 
@@ -46,27 +54,48 @@ cp .env.example .env  # then fill in the CMS token / app password
 /blog-pipeline <topic, or path to a brief / Google-Doc export>
 ```
 
-`pipeline-run` executes in order and **stops at the human gates**:
+`pipeline-run` executes in order, **fails on a blocking gate**, and **stops at the human gates**:
 
-1. Draft (`blog-write`/`blog-rewrite`, brand voice) →
-2. SEO (`blog-seo-check`, `blog-cannibalization`) →
-3. Fact-check (`blog-factcheck` + `blog-researcher`) → produces the VERIFY + LAWYER lists →
-4. Polish (`blog-analyze`, `humanizer`, `entity-bold`, `blog-image`) →
-5. `cms-publish` → CMS **draft** (never live).
+0. **`intake`** — rewrite or fresh? keyword, site, objective. Confirm the plan, wait for approval →
+1. **`research-chain`** — providers in order, recording which one answered →
+2. **SERP gate** — reject on who ranks, before a word is written →
+3. Draft (`blog-write`/`blog-rewrite`, brand voice) →
+4. **`quality-gates`** — voice, facts, links, three-surface schema. Exit 2 ends the run →
+5. Fact-check (`blog-factcheck` + `blog-researcher`) → the VERIFY + LAWYER lists →
+6. Polish (`blog-analyze`, `humanizer`, `entity-bold`, `blog-image`) →
+7. `cms-publish` → **draft** (never live).
 
 **GATE 1** the SEO owner reviews the flagged list (not the whole article). **GATE 2** the SEO
 owner approves go-live after the technical owner publishes to a temp URL. Then indexing +
 `tracker-gen` logs results.
 
+### The gates are the point
+
+The engine could always write an article and publish it. It could not stop a bad one.
+
+```bash
+python3 .../quality-gates/scripts/run_gates.py \
+  --mdx drafts/<slug>.mdx --html out/<slug>.html \
+  --serp scratch/<slug>.serp.json --keyword "<kw>"
+# 0 pass · 1 warnings, or a gate could not run · 2 blocked
+```
+
+**Advisory scorers do not change behaviour.** A score of 78 reads as "good enough" and the
+article ships. Only a non-zero exit code stops it, so every gate here has one, and a gate that
+could not run is never treated as a gate that passed.
+
 ## What's in the engine
 
 | Skill | Does |
 |---|---|
+| `intake` | the conversation before any work starts. Rewrite or fresh, keyword, site, **objective** |
+| `research-chain` | providers in a fallback order, recording **which one answered** |
+| `quality-gates` | the five blocking scripts. SERP, voice, facts, links, schema |
 | `project-init` | onboard a new website's context |
 | `brand-loader` | load BRAND/VOICE/project.yaml so writing obeys the site |
-| `cms-publish` | push a finished draft to the CMS (WordPress adapter included) |
+| `cms-publish` | push a draft to a code-based site or to WordPress. Never live |
 | `entity-bold` | bold the first mention of key entities |
-| `pipeline-run` | the end-to-end two-gate flow |
+| `pipeline-run` | the end-to-end flow, failing on a blocking gate |
 | `tracker-gen` | the shareable content dashboard |
 
 Plus the MIT `blog-*` / `seo-*` / `diagram-design` skills it orchestrates (installed
@@ -81,7 +110,9 @@ separately — see `docs/DEPENDENCIES.md`).
 ## Golden rules
 
 - **Secrets never enter this repo.** `.env` is gitignored; the engine reads secrets from the
-  environment. Only `.env.example` is committed.
+  environment. Only `.env.example` is committed. Every provider holds **several** credentials,
+  numbered `_1`, `_2`, `_3`, because quota exhaustion on a single key is what took one
+  provider out of an account entirely.
 - **Publish only to `draft`.** Going live is a human action in the CMS.
 - **Required gates are non-negotiable** for legal/medical/financial topics (`project.yaml → gates`).
 
@@ -92,6 +123,8 @@ MIT (this plugin). It depends on separately-licensed skills — see `LICENSE` an
 
 ## Roadmap
 
+- [ ] wire `providers.py` rotation into the MCP research calls, not just the config shape
+- [ ] Ahrefs: authorise the OAuth connector in an interactive session, or fund a second route
 - [ ] WordPress adapter hardening (Yoast/RankMath REST meta, media alt, categories/tags create)
 - [ ] Strapi + Ghost adapters
 - [ ] `brand-loader` → auto-derive an entity list for `entity-bold`

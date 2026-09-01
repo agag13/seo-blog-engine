@@ -1,53 +1,96 @@
 ---
 name: cms-publish
-description: Publish a finished blog draft to the website's CMS as a DRAFT (never straight to live). Reads the site + CMS config from project.yaml and secrets from .env. WordPress REST is supported now (scripts/wordpress_publish.py); Strapi and Ghost adapters follow the same interface. Use when the user says "publish to WordPress/CMS", "push the draft", "send to <site>", after a post has passed the fact-check + SEO gates.
+description: Push a finished, gate-passed article to its destination as a DRAFT. Two targets - a code-based site (Next.js, Astro) receives an .md/.mdx file plus a sibling .html carrying the JSON-LD, uncommitted and undeployed; a WordPress site is pushed through the Novamira MCP as a draft post. Never publishes live. Use when the user says "publish this", "push the draft", "send it to WordPress", or a pipeline reaches its publish step.
 ---
 
-# CMS Publish
+# CMS publish
 
-Push one finished article to the site's CMS **as a draft**, so a human can review and go
-live. CMS-agnostic: the adapter is chosen from `project.yaml -> cms.type`.
+**One rule that never bends: publish as a draft.** Going live is a human action, in the CMS,
+by a person who looked at the page. That rule was already here and it stays.
 
-## Preconditions (enforce these)
-1. `project.yaml` and `.env` exist in the working directory (else run `project-init`).
-2. The post has passed the gates the site requires (see `project.yaml -> gates`):
-   fact-check for legal/medical/financial topics, plus SEO check. Do NOT publish a post
-   that failed a required gate.
-3. `cms.default_status` is `draft`. This skill never sets `publish` — a human does that in
-   the CMS. Refuse "publish live" requests; explain the review gate.
+**Second rule, new: the gates run first.** `run_gates.py` must exit 0 or 1 before this skill
+does anything. A gate that could not run is not a gate that passed, and a run at verdict 2
+does not reach this step at all.
 
-## WordPress (supported now)
-Auth = an Application Password (WP Admin → Users → Profile → Application Passwords),
-stored in `.env` as `WP_USER` + `WP_APP_PASSWORD`.
+## Which target
 
-Run:
+Read `project.yaml → cms.type`.
+
+| `cms.type` | Target | What happens |
+|---|---|---|
+| `markdown` | code-based site | two files written into `cms.output_dir`. No commit, no deploy |
+| `wordpress` | Novamira MCP | one draft post, plus SEO meta where the site's plugin supports it |
+| `strapi`, `ghost` | not built | say so plainly and stop |
+
+## Target 1, code-based sites (Next.js, Astro, Hugo, Eleventy)
+
+```bash
+python3 scripts/markdown_publish.py --mdx drafts/<slug>.mdx --out <site>/content/blog
 ```
-python3 scripts/wordpress_publish.py \
-  --project ./project.yaml \
-  --content ./post.md \
-  --meta ./post.meta.json \
-  [--featured ./hero.png] [--update <post_id>] [--dry-run]
-```
-- `--content` accepts markdown (converted to WordPress block HTML) or `.html` (used as-is).
-- `--meta` is JSON: title, slug, excerpt, seo_title, seo_description, category, author, tags, published_date.
-- Always run `--dry-run` first and show the user the resolved payload (title, slug, status,
-  category id, byte count) before the real call.
-- The script creates the post with `status=draft` and returns the post id + the WP edit URL.
 
-## SEO meta caveat (WordPress)
-Yoast / RankMath titles + descriptions are plugin meta. The script sets them via the REST
-`meta` map in `project.yaml -> cms.fields`, which works only if the site exposes those meta
-keys to REST (Yoast/RankMath ≥ recent versions, or a small mu-plugin). If the site rejects
-them, the script warns and the reviewer sets them in the CMS. Never fail the whole publish
-over SEO meta.
+It writes **two** files:
 
-## Other CMS
-- **Strapi**: `POST/PUT /api/articles?status=draft`; body byte-exact in the mapped `body_html`
-  field; token from `.env STRAPI_API_TOKEN`. (Adapter: `scripts/strapi_publish.py` — port the
-  WordPress adapter's interface.)
-- **Ghost**: Admin API (`/ghost/api/admin/posts/`), token `GHOST_ADMIN_API_KEY`.
-- **markdown**: write an `.mdx`/`.md` file into the site repo's content dir for a JAMstack build.
+- `<slug>.mdx`, the article source with frontmatter intact
+- `<slug>.html`, the sibling carrying the JSON-LD and the visible FAQ
 
-## After publish
-Report the draft URL, remind the reviewer it is not live, and hand off to `tracker-gen`
-(to log it) and, once live, `request-indexing`.
+**The sibling HTML is not optional and it is not decoration.** `schema_check.py` matches
+every FAQ answer across three surfaces, and this file is one of them. Shipping the source
+alone means the schema gate has nothing to check, which is not the same as the schema being
+fine.
+
+**Do not commit and do not deploy.** On a code-based site "live" is a commit, so the engine
+does not make one. The script reports `committed: false, deployed: false` and names the two
+paths. A human reviews and commits.
+
+It refuses to overwrite an existing file unless `--force` is passed, and warns when the
+frontmatter does not carry `draft: true`, because the site's own build may not be as careful
+as this script is.
+
+## Target 2, WordPress through the Novamira MCP
+
+### Check which server connects, at runtime, before publishing
+
+There are several Novamira MCP servers configured and **they are not all up**. As of
+2026-09-01, verified by calling each:
+
+| Server | State |
+|---|---|
+| `novamira-blockchainpress` | **connects.** WordPress 7.1, PHP 8.2, Rank Math active |
+| `novamira-fameninja-com` | fails to connect |
+| `novamira-project-1-local` | fails to connect, `ENOTFOUND` |
+
+So: call `mcp-adapter-discover-abilities` on the intended server first. If it answers, the
+server is live and the ability list tells you what this particular site supports, which
+differs per install.
+
+**A dead server is reported, never skipped.** Say which server, say what the failure was,
+and stop. Do not fall back to a different site's server, and do not carry on to the next
+pipeline step as if the publish happened. An article that silently did not publish is worse
+than one that failed loudly, because nobody goes looking for it.
+
+### Publishing
+
+1. `novamira/create-post` with `status: "draft"`. Never `publish`.
+2. SEO meta through whichever plugin the install actually has. On the verified server that
+   is **Rank Math**, so `novamira/rank-math-edit-post-seo` for the title, meta description
+   and focus keyword, and `novamira/rank-math-edit-post-schema` for the schema type. Yoast
+   sites take the Yoast fields instead. Read the discovery output; do not assume.
+3. Return the edit URL.
+
+## Byline, and the thing that makes it worse than nothing
+
+If the article carries a named author, the site must also carry that author's **bio and
+photo**. Measured on the reference account, a named author without them scored roughly
+**8 points worse on authoritativeness than no named author at all**.
+
+So: publish with a byline only when the bio and the photo exist. If they do not, either
+publish unbylined or warn loudly in the report. Do not add a name and hope.
+
+## Guardrails
+
+- Draft status only. Every target. No exceptions and no flag to override it.
+- Gates first. A verdict of 2 does not reach this skill.
+- One article per run.
+- Never publish a page whose sibling HTML is missing, without saying that the schema and
+  the three-surface FAQ match went unverified.
+- Never commit or deploy on a code-based site.

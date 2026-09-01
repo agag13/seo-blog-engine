@@ -1,0 +1,82 @@
+# ─────────────────────────────────────────────────────────────
+# voice-fingerprint.yaml — the MEASURED voice bands for one site.
+# Goes at <site>/config/voice-fingerprint.yaml. Read by voice_check.py.
+#
+# Every number here must be computed from real text the client already
+# published. Do not assert bands. A guessed band is worse than no band: it
+# blocks good copy and passes bad copy, and then somebody switches the gate off.
+#
+# The reason this file exists rather than a paragraph in VOICE.md: prose
+# guidance does not work, because a model reads past it. A number fails.
+# ─────────────────────────────────────────────────────────────
+
+schema_version: 1
+active: house-article           # which profile voice_check uses by default
+extracted_at: "YYYY-MM-DD"
+refresh_due: "YYYY-MM-DD"       # 90 days out. A stale fingerprint is a stale gate.
+
+profiles:
+
+  house-article:
+    profile_id: house-article
+    register: casual-professional
+    intent: [seo-articles, guides, comparisons]
+    sample_count: 0             # how many documents were measured
+    sample_word_count: 0
+    source: "<where the corpus came from, and the date it was fetched>"
+
+    cadence:
+      sentence_length:
+        mean: 13.0
+        p90: 24
+        length_cv_floor: 0.50   # below this, sentences are too uniform
+      paragraph_length:
+        max_words: 70                       # hard ceiling. Blocks above it.
+        one_sentence_paragraph_frequency: 0.30   # the band that matters most
+
+    mechanics:
+      contraction_rate: 0.35
+      em_dash_usage: never      # `never` makes any em dash a block
+
+    lexical:
+      mattr_floor: 0.78
+
+    idioms:
+      signature_phrases: []     # phrases that are characteristically this voice
+
+  # A second profile for a different register, e.g. a founder byline or a guest
+  # post. Never average two registers into one profile; the average describes
+  # nobody.
+  founder-essay:
+    profile_id: founder-essay
+    register: conversational
+    intent: [guest-posts, bylines, social]
+    sample_count: 0
+    source: ""
+    cadence:
+      sentence_length: {mean: 11.0, p90: 21, length_cv_floor: 0.55}
+      paragraph_length: {max_words: 70, one_sentence_paragraph_frequency: 0.40}
+    mechanics: {contraction_rate: 0.45, em_dash_usage: never}
+    lexical: {mattr_floor: 0.78}
+
+# Words this client bans that the engine's global AI-slop list does not cover.
+banned_words_user_specific: []
+
+# Brand rules the engine cannot know. Each entry blocks unless it declares
+# `severity: warn`, which is right for the rules that are judgment calls. A gate
+# that blocks on a judgment call gets switched off, and then it blocks nothing.
+banned_structures: []
+#  - id: never-the-best
+#    pattern: "(?i)<brand> is (the )?(best|leading|top|#1)"
+#    why: "One honest option among several. BRAND.md."
+#    severity: block
+
+# A list-shaped domain (chains, integrations, supported banks) that copy drifts
+# into enumerating. Two or more in one draft warns. Empty disables the check.
+enumeration_watch: []
+
+extraction:
+  method: >-
+    How the numbers were computed, and by what. Anyone re-running this must be
+    able to reproduce them.
+  confidence: low               # low until measured from a real corpus

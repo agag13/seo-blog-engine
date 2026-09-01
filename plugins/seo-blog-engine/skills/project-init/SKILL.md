@@ -25,20 +25,45 @@ this from inside that website's own folder (its own git repo), never inside the 
      author id map, allowed categories.
    - Cadence + timezone + GSC property.
 
-3. **Write the four files** into the project folder, from the engine's `templates/`:
-   - `BRAND.md`     (from `templates/BRAND.md.template`, filled in)
-   - `VOICE.md`     (from `templates/VOICE.md.template`, filled in)
-   - `project.yaml` (from `templates/project.yaml.template`, filled in)
-   - `.env.example` (from `templates/env.example`) — and remind the user to copy it to
-     `.env` and fill secrets. NEVER write real secrets to disk here.
+3. **Write the files** into the project folder, from the engine's `templates/`:
 
-4. **Write/append `.gitignore`** in the project folder to ignore `.env` and `.env.*`
+   | File | From | Note |
+   |---|---|---|
+   | `BRAND.md` | `BRAND.md.template` | audience, positioning, honesty rules |
+   | `VOICE.md` | `VOICE.md.template` | readable prose. Not the gate |
+   | `project.yaml` | `project.yaml.template` | site, CMS, gates |
+   | `PARTNERS.md` | `PARTNERS.md.template` | **who this client never writes competitively about** |
+   | `FACTS.md` | `FACTS.md.template` | **every product fact, with a status and a source** |
+   | `config/voice-fingerprint.yaml` | `voice-fingerprint.yaml.template` | the measured bands. **The gate** |
+   | `.env.example` | `env.example` | copy to `.env` and fill. NEVER write real secrets here |
+
+   `examples/nika/` in the engine repo holds filled-in `PARTNERS.md` and `FACTS.md` from a
+   real account. Read those for the shape before writing a new one.
+
+4. **Interview for the two context files**, because they cannot be inferred:
+   - **Partners.** "Who do you work with that we must never write competitively about?"
+     Ask for domains too. This blocks whole article types, so an incomplete answer here
+     surfaces later as a keyword that has to be dropped after the research is done.
+   - **Facts.** Take the client's product claims and mark each EVIDENCED, BETA, CONFLICTED,
+     or NOT PUBLISHED, with the source. Expect to find contradictions between the client's
+     own surfaces; on one account a single number appeared four times with an 8x spread.
+     Those become CONFLICTED, not a judgement call at writing time.
+
+5. **Measure the voice, do not assert it.** The fingerprint template ships with placeholder
+   bands and `confidence: low`. Fill it from a real corpus of the client's published writing
+   before the first article, or the voice gate compares against defaults and says so.
+
+6. **Write/append `.gitignore`** in the project folder to ignore `.env` and `.env.*`
    (keep `.env.example`).
 
-5. **Report** a short summary and the exact next command (usually `pipeline-run` or a
-   `blog-write` on the first topic). Confirm the CMS `default_status` is `draft`.
+7. **Report** a short summary and the exact next command, which is `intake`, not a write.
+   Confirm the CMS `default_status` is `draft`, and say plainly which of `PARTNERS.md`,
+   `FACTS.md` and the fingerprint are still placeholders, because each one that is a
+   placeholder is a gate that cannot block anything.
 
 ## Guardrails
 - Do not invent brand facts. If the user does not know a field, leave a clear TODO.
+- Do not invent voice bands. A guessed band blocks good copy and passes bad copy.
+- An empty `PARTNERS.md` or `FACTS.md` is honest. A speculative one is not.
 - Never place API tokens in `project.yaml` or any committed file — only in `.env`.
 - One website per project folder. Do not mix two brands' context in one folder.

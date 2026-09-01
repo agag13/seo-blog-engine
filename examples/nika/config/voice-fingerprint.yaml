@@ -1,0 +1,345 @@
+# Nika voice fingerprint
+#
+# Measured, not asserted. Every number below was computed from real text by the
+# lenses in the `voice-extractor` skill (Burrows's Delta function-word vector,
+# sentence-length burstiness, MATTR, punctuation rates, opener profile, Biber
+# Dimension-1 register proxy).
+#
+# Two profiles, because voice-extractor's own quality bar says never average
+# incompatible registers:
+#
+#   nika-daniel-essay  - Daniel's actual published voice. Measured from 11
+#                        founder-voice essays on nika.finance. Use for brand
+#                        essays, guest posts, LinkedIn, and any thought-
+#                        leadership piece carrying a byline.
+#   nika-article       - the SEO/comparison article register. Anchored to the
+#                        four shipped articles, but CORRECTED back toward
+#                        Daniel on the four dimensions where the drift was not
+#                        justified by the form. See `corrections` below.
+#
+# Selection: nika-content-writer picks by mode. mode=inhouse -> nika-article.
+# mode=guest -> nika-daniel-essay.
+#
+# `docs/voice-rules.md` remains the locked authority on WHAT may be said.
+# This file governs HOW it sounds. Where the two disagree, voice-rules wins,
+# and the disagreement is recorded here as a policy_override.
+
+schema_version: 1
+active: nika-article
+extracted_at: "2026-08-13"
+refresh_due: "2026-11-11"  # 90-day decay stamp per voice-extractor
+
+# ---------------------------------------------------------------------------
+# The finding that justifies this file existing
+# ---------------------------------------------------------------------------
+# The shipped articles pass every hard rule in voice-rules.md and still do not
+# sound like Daniel. The drift is entirely in cadence, and two of voice-
+# extractor's warn rules would have caught it:
+#
+#   paragraph_rate_drift  one-sentence paragraphs 42.1% -> 11.7% (28% of
+#                         fingerprint; the rule fires below 50%)
+#   contraction_rate_drop contractions 49% -> 24% of contractible pairs
+#                         (49% of fingerprint; the rule fires below 50%)
+#
+# The single clearest number is not an average. Across 297 paragraphs of
+# Daniel's essays, exactly ONE runs over 70 words. Across 290 paragraphs of
+# shipped article copy, 62 do. The articles are not badly written. They are
+# stacked into walls, and that is what makes them read as corporate.
+#
+# Reproduce with:  python3 scripts/voice_stats.py --fetch-essays
+#                  python3 scripts/voice_stats.py --shipped
+
+profiles:
+
+  # =========================================================================
+  nika-daniel-essay:
+    profile_id: nika-daniel-essay
+    register: casual-professional
+    intent: [guest-posts, brand-essays, founder-voice, social]
+    sample_count: 11
+    sample_word_count: 6961
+    sentence_count: 607
+    paragraph_count: 297
+    source: "nika.finance/blog founder-voice essays, fetched 2026-08-13"
+
+    cadence:
+      sentence_length:
+        mean: 11.3
+        median: 10
+        p10: 4
+        p90: 21
+        stdev: 7.1
+        length_cv: 0.628
+        short_sentence_frequency: 0.362   # under 8 words
+        long_sentence_frequency: 0.040    # over 25 words
+      paragraph_length:
+        mean_sentences: 2.04
+        mean_words: 23.4
+        one_sentence_paragraph_frequency: 0.421
+        paragraphs_over_70_words: 1       # out of 297
+      rhythm_signature: short-burst
+
+    mechanics:
+      contractions: mixed
+      contraction_rate: 0.49
+      em_dash_usage: never          # POLICY OVERRIDE, see policy_overrides
+      em_dash_per_1k_words: 0
+      oxford_comma: inconsistent
+      ellipsis_usage: never
+      exclamation_rate_per_1k_words: 0.0
+      question_rate_per_1k_words: 1.29
+      semicolon_rate_per_1k_words: 0.14
+      colon_rate_per_1k_words: 4.74
+      parenthetical_aside_frequency: low   # measured 0.0 per 1k
+      smart_quotes: yes
+
+    lexical:
+      mattr: 0.856
+      function_word_per_1k:
+        the: 43.96
+        to: 24.13
+        and: 23.56
+        a: 20.40
+        is: 17.10
+        that: 16.38
+        it: 12.64
+        of: 12.35
+        in: 11.21
+        not: 9.77
+        will: 9.34
+        for: 7.90
+        you: 7.04
+        they: 6.75
+        can: 6.32
+
+    openers:
+      observed: [the, it, nika, they, crypto, in, that, this, no, you, most, for, and, its, but]
+      banned_from_use:
+        - "Imagine if"
+        - "Picture this"
+        - "What if I told you"
+        - "In today's"
+        - "In an era of"
+        - "Let's face it"
+
+    sentence_initial:
+      conjunction_starts_allowed: true
+      conjunction_start_rate: 0.042
+      uses_however_furthermore_moreover: false
+      uses_in_conclusion_in_summary: false
+      uses_imagine_if: false
+
+    idioms:
+      signature_phrases:
+        - "in one place"
+        - "instead of"
+        - "rather than"
+        - "behind the scenes"
+        - "the next decade"
+        - "designed to"
+        - "long term"
+        - "the companies that"
+      signature_words: [platform, industry, single, users, built]
+
+    register_axis:
+      involved_score: 0.91          # involved:informational ratio
+      classification: involved
+
+    perspective_anchors:
+      first_person_rate_per_1k: 6.32
+      second_person_rate_per_1k: 13.07
+      note: >-
+        Writes AT the reader, not about himself. Second person runs roughly
+        twice first person. A draft that inverts that ratio does not sound
+        like Daniel.
+
+  # =========================================================================
+  nika-article:
+    profile_id: nika-article
+    register: casual-professional
+    intent: [seo-articles, comparison-pages, explainers]
+    sample_count: 5
+    sample_word_count: 16436
+    sentence_count: 1088
+    paragraph_count: 290
+    source: "content-briefs/*.mdx, the four shipped articles plus the DPM draft"
+    derivation: >-
+      Bands are the measured shipped-article values EXCEPT where marked
+      `corrected`, which pull back toward nika-daniel-essay. A correction means
+      the shipped drift was a habit, not a requirement of the form.
+
+    cadence:
+      sentence_length:
+        mean: 13.0                  # corrected: measured 14.5, Daniel 11.3
+        measured_mean: 14.5
+        median: 13
+        p10: 5
+        p90: 24                     # corrected: measured 26, Daniel 21
+        stdev: 9.1
+        length_cv: 0.624
+        length_cv_floor: 0.500      # low_burstiness fires below this
+        short_sentence_frequency: 0.290   # corrected: measured 0.230, Daniel 0.362
+        long_sentence_frequency: 0.080    # corrected: measured 0.110, Daniel 0.040
+      paragraph_length:
+        mean_sentences: 2.60        # corrected: measured 3.75, Daniel 2.04
+        mean_words: 40              # corrected: measured 56.7, Daniel 23.4
+        max_words: 70               # hard ceiling. Split anything longer
+        one_sentence_paragraph_frequency: 0.25  # corrected: measured 0.117, Daniel 0.421
+        paragraphs_over_70_words_per_100: 5     # corrected: measured 21, Daniel 0.3
+      rhythm_signature: mixed
+
+    mechanics:
+      contractions: mixed
+      contraction_rate: 0.35        # corrected: measured 0.24, Daniel 0.49
+      em_dash_usage: never
+      em_dash_per_1k_words: 0
+      middot_rate_per_1k_words: 1.46   # the approved em-dash substitute
+      oxford_comma: inconsistent
+      ellipsis_usage: never
+      exclamation_rate_per_1k_words: 0.0
+      question_rate_per_1k_words: 3.53   # higher than essays by design: question-style H2s
+      semicolon_rate_per_1k_words: 0.06
+      colon_rate_per_1k_words: 16.49     # accepted, driven by table and list lead-ins
+      parenthetical_aside_frequency: low # measured 2.37/1k; Daniel uses none. Keep sparing
+      smart_quotes: no
+
+    lexical:
+      mattr: 0.819
+      mattr_floor: 0.780            # lexical_diversity_drop fires below this
+
+    openers:
+      observed: [it, the, kalshi, polymarket, that, novig, if, yes, you, nika, on, what, we, a, in]
+      note: >-
+        "Yes" and "No" as openers are correct and deliberate. Trust-intent
+        articles must answer the title question in the first word where the
+        answer is genuinely yes or no.
+      banned_from_use:
+        - "Imagine if"
+        - "Picture this"
+        - "What if I told you"
+        - "In today's"
+        - "When it comes to"
+        - "In the world of"
+
+    sentence_initial:
+      conjunction_starts_allowed: true
+      conjunction_start_rate: 0.030   # corrected: measured 0.017, Daniel 0.042
+      uses_however_furthermore_moreover: false
+      uses_in_conclusion_in_summary: false
+
+    idioms:
+      signature_phrases:
+        - "rather than"
+        - "if you want"
+        - "in a wallet you control"
+        - "holds your funds"
+        - "the other side"
+        - "and we would say so"
+      signature_words: [custody, regulated, onchain, funds, contracts]
+
+    register_axis:
+      involved_score: 0.89
+      classification: involved
+
+    perspective_anchors:
+      first_person_rate_per_1k: 10.65
+      second_person_rate_per_1k: 20.38
+
+# ---------------------------------------------------------------------------
+policy_overrides:
+  - field: em_dash_usage
+    measured: "3.59 per 1,000 words in Daniel's published essays"
+    enforced: never
+    why: >-
+      docs/voice-rules.md bans em dashes outright, and
+      docs/content-workstream-status.md records the decision explicitly:
+      follow the locked voice rules, not the live blog's actual em-dash habit.
+      This is the one place where the fingerprint deliberately does not match
+      the source corpus. Substitute a comma, semicolon, period, or middot.
+    severity: block
+
+# ---------------------------------------------------------------------------
+banned_words_user_specific:
+  # From docs/voice-rules.md. These are Nika-specific and not on the global list.
+  - "founder and CEO"       # always "founder of Nika Finance"
+  - "nikafinance.com"       # not our domain
+  - "oversubscribed"
+  - "stealth"
+  - "massively"
+  - "discipline and patience"
+  - "focus and hard work"
+  - "scrappy"
+  - "underdog"
+  - "Hyperliquid clone"
+  - "like Hyperliquid"
+
+domain_exemptions:
+  # Words on voice-extractor's global banned list that are legitimate here.
+  - word: leverage
+    allowed_as: noun
+    why: >-
+      "leverage" and "leveraged" are the correct financial terms for margin
+      trading and appear 5 times across the shipped corpus, every one of them
+      a noun ("no margin and no leverage in the system"). Still banned as a
+      verb: never "leverage our platform".
+  - word: unlock
+    allowed_as: none
+    why: Not observed in either corpus. Keep banned.
+  - word: seamless
+    allowed_as: none
+    decision: considered, kept banned
+    why: >-
+      Appears twice in Daniel's 6,961-word essay corpus ("manage their digital
+      assets seamlessly", "designed to feel seamless, not fragmented") and zero
+      times across 16,436 words of shipped articles. voice-extractor's doctrine
+      lets a word leave the global banned list when the user's real samples
+      prove it is genuinely theirs, but two instances at 0.29 per 1k reads as
+      marketing-page boilerplate that drifted into two essays, not a habit. The
+      articles never reach for it, so banning it costs nothing. Recorded here so
+      the decision is not re-litigated when the gate flags his own prose.
+
+banned_structures:
+  - id: nika-is-the-best
+    pattern: "(?i)nika is (the )?(best|leading|top|#1)"
+    why: "Nika is one honest option, never the best. docs/voice-rules.md."
+    severity: block
+  - id: partner-as-target
+    pattern: "(?i)(polymarket|hyperliquid|li\\.fi|1inch|jumper) (alternatives|competitors|vs\\.? nika)"
+    why: "Partners are never comparison targets. Module 6, Group 1."
+    severity: block
+  - id: chain-enumeration
+    pattern: "(?i)\\b(ethereum|solana|arbitrum|base|polygon)\\b.*\\b(ethereum|solana|arbitrum|base|polygon)\\b"
+    why: >-
+      Say "across multiple chains". Enumerating chains in surface copy is
+      banned except where the chain list is load-bearing to the argument,
+      which is a judgment call, so this warns rather than blocks.
+    severity: warn
+  - id: numbers-in-headline
+    pattern: "^#{1,2} .*\\d{2,}"
+    why: "No hard numbers in headlines, leads or pull quotes. Year in H1 is the exception."
+    severity: warn
+  - id: wall-paragraph
+    pattern: null
+    why: "Any paragraph over 70 words. Measured, not regex. Split it."
+    severity: warn
+    threshold: "70 words"
+
+extraction:
+  extractor_version: "voice-extractor/0.1.0 lenses, computed locally"
+  method: >-
+    Corpus fetched from the live site and from content-briefs/*.mdx, stripped
+    to body prose (headings, tables, frontmatter and MDX comments removed),
+    then measured with stdlib stylometry. Script preserved at
+    scripts/voice_stats.py so the numbers can be recomputed and the bands
+    re-derived when the corpus grows.
+  warnings:
+    - >-
+      nika-article is derived from 5 documents, 4 of which were AI-drafted
+      against these same rules. It is partly a fingerprint of our own output,
+      which is why the corrected bands are anchored to Daniel's human corpus
+      rather than to the measured values.
+    - >-
+      Daniel's essay corpus is 6,961 words. Above voice-extractor's 800-word
+      floor and inside its 5-20 sample range, but small enough that the
+      function-word vector should be treated as indicative.
+  confidence: medium

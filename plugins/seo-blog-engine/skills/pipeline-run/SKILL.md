@@ -1,49 +1,115 @@
 ---
 name: pipeline-run
-description: Run one blog article through the full engine end to end — draft to publish-ready draft — enforcing the two human gates. Orchestrates brand-loader, blog-write/rewrite, blog-factcheck, entity-bold, blog-seo-check, blog-cannibalization, and cms-publish. Use when the user says "run the pipeline", "process this topic/doc", "take <topic> to draft", or hands over a Google Doc for a configured site.
+description: Run one blog article through the full engine end to end - intake, research, SERP gate, draft, enforcement gates, publish-ready draft - failing the run when a gate blocks rather than scoring it. Orchestrates intake, research-chain, brand-loader, blog-write/rewrite, quality-gates, entity-bold, and cms-publish. Use when the user says "run the pipeline", "process this topic", "take <topic> to draft", or hands over a URL or a Google Doc for a configured site.
 ---
 
-# Pipeline Run
+# Pipeline run
 
-The deterministic order the engine runs one article. It produces a CMS **draft** plus a
-short REVIEW list; it never publishes live. Humans own the two gates.
+The deterministic order the engine runs one article. It produces a **draft** plus a short
+REVIEW list; it never publishes live. Humans own the two gates that are judgment calls, and
+scripts own the ones that are not.
 
-## Preflight
-- Ensure `project.yaml`, `BRAND.md`, `VOICE.md`, `.env` exist (else `project-init`).
+**The change that matters: the pipeline fails, it does not score.** Every gate returns an
+exit code, and a blocking exit code ends the run at that step. An advisory number gets read
+as "good enough" and the article ships anyway; that is how every defect on the reference
+account got as far as it did.
+
+## 0. Intake, before anything else
+
+Run **`intake`**. Rewrite or fresh, and for a fresh piece the keyword, the site, and the
+objective. Confirm the plan and **wait for approval**.
+
+Do not start research while the user is thinking about it. The plan changes the research.
+
+## 1. Preflight
+
+- `project.yaml`, `BRAND.md`, `VOICE.md`, `PARTNERS.md`, `FACTS.md`, `.env` exist. If not,
+  `project-init`.
+- `config/voice-fingerprint.yaml` exists and its `refresh_due` has not passed.
 - Load context with `brand-loader`.
+- `python3 quality-gates/scripts/providers.py` to see which credentials are configured.
 
-## The run (stop and report at each gate)
+A missing `PARTNERS.md` or `FACTS.md` does not stop the run, but it does mean two gates
+cannot check anything, and the run report must say so.
 
-1. **Draft** — `blog-write` (new) or `blog-rewrite` (existing). Answer-first, brand voice,
-   honesty rules, FAQ. Structural validate: word count, banned words, 0 em dashes,
-   headings, internal links resolve.
-2. **SEO** — `blog-seo-check`: title/meta length, canonical, slug, heading hierarchy,
-   internal/external links. `blog-cannibalization`: check the primary keyword against the
-   site's live set; if it collides, decide consolidate vs differentiate (that DECISION is a
-   human call — surface it, don't auto-merge live pages).
-3. **Fact-check** — `blog-factcheck` (+ the `blog-researcher` agent). Produce the claim
-   ledger with 0–1.0 scores. Split output into:
-   - auto-cleared (verified) — nobody re-checks,
-   - **VERIFY list** — low-confidence/uncited claims for the reviewer,
-   - **LAWYER list** — for topics in `project.yaml -> gates.factcheck_required_for`.
-   Fix any outright errors in the draft; keep the source's review markers as the trail.
-4. **Polish** — `blog-analyze` (100-pt) + `humanizer` (AI-tells, readability). `entity-bold`.
-   `blog-image` for hero + inline (dignity check on sensitive topics) — only if images are
-   enabled for this project.
-5. **Push draft** — `cms-publish` (draft status). Return the CMS edit URL.
+## 2. Research and the SERP gate, before a word is written
 
-### GATE 1 — human review (SEO owner)
-Reviewer reads only the VERIFY/LAWYER list + the SEO summary, not the whole article. Pass →
-continue; fail → back to step 1/3.
+Run **`research-chain`**. Pull the SERP and the metrics through the fallback chain and record
+which provider answered each figure.
 
-### Publish (technical owner)
-Technical owner publishes the draft to a temp/preview URL and sets schema.
+**Re-pull. Every time.** A stored keyword board is a candidate list, not a data source.
 
-### GATE 2 — approve + go live (SEO owner)
-Owner does live QA (schema renders, mobile), approves go-live, then `request-indexing`
-(GSC) and logs results with `tracker-gen`. Results loop back to the next brief.
+Then:
+
+```bash
+python3 quality-gates/scripts/serp_gate.py --keyword "<kw>" scratch/<slug>.serp.json
+```
+
+**Exit 2 ends the run.** Do not write the article. Go back to the user with what the SERP
+showed and two or three alternatives. This is the cheapest possible place to stop, and it
+killed three of twelve keywords on the reference account, including the one with the best
+volume-to-difficulty figure on the whole board.
+
+Exit 1 is a decision, not a veto. Surface the warnings and let the user decide.
+
+## 3. Draft
+
+`blog-write` for a fresh piece, `blog-rewrite` for a rewrite, in the site's brand voice.
+
+**Namespace every scratchpad artefact to the article slug.** Parallel runs share one
+scratchpad. A build script overwritten mid-run by a sibling once put another article's FAQ
+block into two live articles.
+
+If the article carries a diagram, the information the diagram argues must also exist as
+prose or a table. **An SVG's content is invisible to answer engines.**
+
+## 4. The enforcement gates
+
+```bash
+python3 quality-gates/scripts/run_gates.py \
+  --mdx drafts/<slug>.mdx --html out/<slug>.html \
+  --serp scratch/<slug>.serp.json --keyword "<kw>"
+```
+
+| Exit | Meaning | What happens |
+|---|---|---|
+| 0 | every gate that ran, passed | continue |
+| 1 | warnings, or a gate could not run | continue, and put every warning in the REVIEW list |
+| 2 | a gate blocked | **the run fails here.** Fix and re-run the gates |
+
+**Re-run the gates after the final edit, never before.** The three-surface FAQ match verified
+before the last edit means nothing after it.
+
+## 5. Fact-check and polish
+
+`blog-factcheck` with the `blog-researcher` agent. Split into auto-cleared, a **VERIFY** list,
+and a **LAWYER** list for topics in `project.yaml → gates.factcheck_required_for`.
+
+The coordinator is a source of error too. On one run the fact-check layer corrected two
+premises that came from the brief itself, and both articles were stronger for it. A brief is
+not evidence.
+
+Then `blog-analyze`, `entity-bold`, and `blog-image` if images are enabled. These are
+advisory and they are allowed to be, because the blocking work already happened.
+
+## 6. Publish as a draft
+
+`cms-publish`. Code-based site or WordPress, draft only, and check the MCP server connects
+before claiming a WordPress publish happened.
+
+### GATE 1, human review, SEO owner
+Reviewer reads the VERIFY/LAWYER list and the gate warnings, not the whole article.
+
+### Publish to a preview URL, technical owner
+
+### GATE 2, approve and go live, SEO owner
+Live QA, then `request-indexing` and log with `tracker-gen`.
 
 ## Guardrails
-- Never skip a required gate for a `factcheck_required_for` topic.
-- Never set CMS status to `publish` — that is a human action in the CMS.
-- One article per run; report cleanly so the reviewer can act in minutes.
+
+- Never skip intake.
+- Never write an article whose SERP gate exited 2.
+- Never set a CMS status to `publish`.
+- Never treat a gate that could not run as a gate that passed.
+- Never report a figure without the provider that answered for it.
+- One article per run.

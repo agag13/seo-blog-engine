@@ -1,0 +1,47 @@
+# Partners
+
+Who this client never writes competitively about.
+
+**Why this file is a file and not a sentence in BRAND.md.** A prose honesty rule does not
+stop an agent writing "alternatives to X" about a partner. The agent is optimising for a
+SERP, and the rule is a line in a document it read once. This file is parsed by
+`voice_check.py` and by `serp_gate.py`, so the rule has an exit code behind it.
+
+On one account this blocked whole article types, and three partners turned up ranking on
+target SERPs inside a single week.
+
+## Format
+
+One partner per `## heading`. The heading text is the name the gates match on, so use the
+name as it appears in copy and in domains. Everything under the heading is for the writer.
+
+- `voice_check.py` blocks "alternatives to <partner>", "<partner> competitors",
+  "<brand> vs <partner>" and "best <partner> ..." anywhere in a draft.
+- `serp_gate.py` rejects a keyword whose live SERP has a partner ranking on it.
+
+---
+
+## Example Partner Inc
+
+- **Relationship:** what they actually are to this client (supplier, integration, investor,
+  reseller). One line.
+- **How they may appear in copy:** the only framings that are allowed. Be specific, because
+  "positively" is not a rule a writer can apply.
+- **Never:** the framings that are banned, named explicitly.
+- **Domains:** partnerinc.com, docs.partnerinc.com
+
+## Another Partner
+
+- **Relationship:**
+- **How they may appear in copy:**
+- **Never:**
+- **Domains:**
+
+---
+
+## Review
+
+Partner lists go stale, and a lapsed partner blocking article types is as expensive as a
+current partner being attacked. Re-confirm with the client every quarter and stamp the date.
+
+**Last confirmed with client:** YYYY-MM-DD

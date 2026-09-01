@@ -1,0 +1,22 @@
+{
+  "_note": "Live DataForSEO serp_organic_live_advanced pull, en / United States, 2026-09-01. Trimmed to the fields the gate reads. This is the regression fixture for single-brand-owns-page: difficulty read 6, the easiest figure on the board, and the SERP is Coinbase's own property.",
+  "keyword": "coinbase perpetual futures",
+  "items": [
+    {"type": "ai_overview", "rank_absolute": 1, "references": [
+      {"domain": "www.coinbase.com", "url": "https://www.coinbase.com/learn/perpetual-futures/what-are-perpetual-futures"},
+      {"domain": "www.fool.com", "url": "https://www.fool.com/investing/2026/08/30/coinbase-is-adding-perpetual-futures-to-its-base-a/"},
+      {"domain": "www.bankless.com", "url": "https://www.bankless.com/read/news/coinbase-launches-24-7-perpetual-futures-trading-for-major-u-s-stocks-and-etfs"}
+    ]},
+    {"type": "organic", "rank_absolute": 2, "domain": "www.coinbase.com", "title": "Coinbase Advanced | Trade Perpetual Futures + Spot", "url": "https://www.coinbase.com/derivatives-trading"},
+    {"type": "organic", "rank_absolute": 3, "domain": "www.coinbase.com", "title": "What are Perpetual Futures?", "url": "https://www.coinbase.com/learn/perpetual-futures/what-are-perpetual-futures"},
+    {"type": "people_also_ask", "rank_absolute": 4, "items": []},
+    {"type": "organic", "rank_absolute": 5, "domain": "www.coinbase.com", "title": "Coinbase Advanced: Trade perpetual futures + spot", "url": "https://www.coinbase.com/advanced-trade/perpetuals/BTC-PERP-INTX"},
+    {"type": "organic", "rank_absolute": 6, "domain": "www.coinbase.com", "title": "Understanding Funding Rates in Perpetual Futures and ...", "url": "https://www.coinbase.com/learn/perpetual-futures/understanding-funding-rates-in-perpetual-futures"},
+    {"type": "organic", "rank_absolute": 7, "domain": "www.coinbase.com", "title": "The Benefits of Perpetual Futures for Experienced Traders", "url": "https://www.coinbase.com/learn/perpetual-futures/the-benefits-of-perpetual-futures-for-experienced-traders"},
+    {"type": "organic", "rank_absolute": 8, "domain": "www.coinbase.com", "title": "US Perpetual Futures 101", "url": "https://www.coinbase.com/learn/futures/us-perpetual-futures-101"},
+    {"type": "organic", "rank_absolute": 9, "domain": "www.coinbase.com", "title": "Coinbase Derivatives", "url": "https://www.coinbase.com/derivatives"},
+    {"type": "organic", "rank_absolute": 10, "domain": "www.youtube.com", "title": "Coinbase Perpetuals: How To Trade For Profit! 2025", "url": "https://www.youtube.com/watch?v=_yRUiO1S6Rc"},
+    {"type": "organic", "rank_absolute": 11, "domain": "www.bankless.com", "title": "Coinbase Launches 24/7 Perpetual Futures Trading for ...", "url": "https://www.bankless.com/read/news/coinbase-launches-24-7-perpetual-futures-trading-for-major-u-s-stocks-and-etfs"},
+    {"type": "related_searches", "rank_absolute": 12, "items": []}
+  ]
+}
