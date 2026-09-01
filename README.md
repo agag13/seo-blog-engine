@@ -28,6 +28,11 @@ Two of those context files are new and they carry the rules the engine cannot in
 "alternatives to X" about a partner. **`FACTS.md`** gives every product claim a status of
 EVIDENCED, BETA, CONFLICTED or NOT PUBLISHED, and the last two block.
 
+> **Setting this up for a team? Start at [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md).**
+> It is the complete list: what each person installs, which MCP servers are shared and which
+> are per website, what the client has to supply, and how to check the setup before the first
+> run. `examples/nika/` is a filled-in worked example of one site's context.
+
 ## Install (each teammate, once)
 
 ```bash
@@ -37,16 +42,28 @@ EVIDENCED, BETA, CONFLICTED or NOT PUBLISHED, and the last two block.
 ```
 
 Then install the skills this engine calls (writing, SEO, fact-check, diagram) —
-see [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md).
+see [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) — and `pip3 install pyyaml`, without which
+the voice gate falls back to bands nobody measured.
 
 ## Onboard a new website
 
 From inside that website's own project folder (not this repo):
 
 ```
-project-init          # interviews you, writes BRAND.md / VOICE.md / project.yaml / .env.example
-cp .env.example .env  # then fill in the CMS token / app password
+project-init          # interviews you, writes the context files
+cp .env.example .env  # then fill in the credentials
+
+python3 <plugin>/skills/quality-gates/scripts/doctor.py
+# 0 ready · 1 runnable but a gate cannot check anything · 2 not ready
 ```
+
+`doctor.py` is the answer to "what still needs filling in". It reports READY / warn / STOP
+per item with the fix for each. **Exit 1 is the state to watch**: the pipeline runs, an
+article comes out, and one of the gates is standing there with nothing to compare against.
+
+**WordPress is per site.** Each website has its own Novamira install and its own MCP server
+entry; whoever owns the site connects it. The engine checks at run time which server answers
+and reports a dead one rather than skipping the publish.
 
 ## Run one article
 
