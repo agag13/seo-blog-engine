@@ -19,6 +19,7 @@ here exits 2 on a block, and `pipeline-run` fails the run rather than noting it.
 | SERP | `serp_gate.py` | who ranks, before writing starts |
 | Voice | `voice_check.py` | banned structures, partner framing, cadence bands |
 | Facts | `facts_check.py` | product claims that are CONFLICTED or NOT PUBLISHED |
+| Claims | `claims_check.py` | outside claims: uncited, absent from the source, stale, or overstated |
 | Links | `links_check.py` | an internal link that 404s and was not declared |
 | Schema | `schema_check.py` | invalid JSON-LD, or a FAQ answer that differs across three surfaces |
 
@@ -33,7 +34,9 @@ python3 scripts/run_gates.py \
   --mdx drafts/<slug>.mdx \
   --html drafts/<slug>.html \
   --serp scratch/<slug>.serp.json \
-  --keyword "<target keyword>"
+  --keyword "<target keyword>" \
+  --claims-ledger scratch/<slug>-claims.json \
+  --source-cache scratch/sources
 ```
 
 | Exit | Meaning |
@@ -109,6 +112,41 @@ Blocks any draft stating a fact the site's `FACTS.md` marks CONFLICTED or NOT PU
 
 This is what stopped a leverage number publishing while four contradictory figures, an 8x
 spread, sat on the client's own surfaces.
+
+### Claims, `claims_check.py`
+
+Fact-checking is the reported bottleneck in AI content work, to the point where
+practitioners say checking the output takes longer than writing it. That is true of the
+judgment half. It is not true of the rest, and the rest is what actually goes wrong.
+
+Five checks, four of them needing no judgment at all:
+
+1. a claim carrying a figure has a citation
+2. the cited URL resolves (the links gate already covers this)
+3. **the claimed value actually appears on the cited page**
+4. the source is recent enough for a present-tense claim
+5. the draft's hedge is not stronger than the source's
+
+**Check 3 catches the commonest hallucination**, which is not an invented link. It is a
+correct-looking link to a page that never made the claim. Figures are normalised first, so
+`$3.4bn` matches `3.4 billion` and `$3,400,000,000`; without that the gate produces false
+blocks and gets switched off within a week.
+
+**Checks 4 and 5 are the ones that look verified.** "Bridges are the largest category of
+DeFi loss" was true in 2022 and false by 2025: the source exists, says it, and a string
+match passes. And a source saying "some" becomes a draft saying "most" without either the
+source or the figure changing. Both really happened, and neither is visible to a check that
+only asks whether the citation resolves.
+
+A source that cannot be read is **not** evidence the claim is wrong. It warns, lands on the
+VERIFY list, and never silently passes. Pre-fetch those pages with a real extractor into
+`--source-cache`.
+
+**Qualitative claims need the model.** A regex finds figures; it does not find "most X are
+Y", which is the shape of the two worst errors on the reference account. So the fact-check
+skill extracts those into `<slug>-claims.json` and this gate enforces that every entry has
+a citation and a verdict. Extraction is judgment. Coverage is arithmetic, and coverage is
+what gets enforced.
 
 ### Links, `links_check.py`
 

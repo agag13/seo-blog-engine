@@ -10,6 +10,7 @@ Gates, in the order they run:
     serp     serp_gate.py     did the live SERP allow this keyword at all
     voice    voice_check.py   cadence bands, banned structures, partners
     facts    facts_check.py   product claims against the FACTS.md ledger
+    claims   claims_check.py  outside claims: cited, present in the source, current
     links    links_check.py   internal links resolve or are declared forward-links
     schema   schema_check.py  JSON-LD valid, FAQ byte-matched across three surfaces
 
@@ -53,7 +54,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 PY = sys.executable or "python3"
 
-GATE_NAMES = {"serp", "voice", "facts", "links", "schema"}
+GATE_NAMES = {"serp", "voice", "facts", "claims", "links", "schema"}
 
 
 def run(name: str, script: str, args: list[str]) -> dict:
@@ -79,6 +80,12 @@ def main() -> int:
     ap.add_argument("--project-root", default=None)
     ap.add_argument("--external-links", action="store_true",
                     help="also probe outbound citations (slower)")
+    ap.add_argument("--claims-ledger", default=None,
+                    help="<slug>-claims.json from the fact-check skill, carrying the "
+                         "qualitative claims a regex cannot find")
+    ap.add_argument("--source-cache", default=None,
+                    help="directory of pre-fetched source pages, for sites a plain "
+                         "fetch cannot read")
     ap.add_argument("--allow-skipped", default="",
                     help="comma-separated gate names you are knowingly running without, "
                          "e.g. `serp,schema`. Anything not named here still blocks. There "
@@ -109,10 +116,13 @@ def main() -> int:
         prof = ["--profile", a.profile] if a.profile else []
         results.append(run("voice", "voice_check.py", [a.mdx, *prof, *root]))
         results.append(run("facts", "facts_check.py", [a.mdx, *root]))
+        cl = (["--ledger", a.claims_ledger] if a.claims_ledger else []) + \
+             (["--source-cache", a.source_cache] if a.source_cache else [])
+        results.append(run("claims", "claims_check.py", [a.mdx, *cl, *root]))
         ext = ["--external"] if a.external_links else []
         results.append(run("links", "links_check.py", [a.mdx, *ext, *root]))
     else:
-        for g in ("voice", "facts", "links"):
+        for g in ("voice", "facts", "claims", "links"):
             skipped.append((g, "no --mdx given."))
 
     if a.html:
