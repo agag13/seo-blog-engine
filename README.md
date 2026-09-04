@@ -28,7 +28,10 @@ Two of those context files are new and they carry the rules the engine cannot in
 "alternatives to X" about a partner. **`FACTS.md`** gives every product claim a status of
 EVIDENCED, BETA, CONFLICTED or NOT PUBLISHED, and the last two block.
 
-> **Setting this up for a team? Start at [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md).**
+> **New here? Read [`ORIENTATION.md`](ORIENTATION.md) first** — what this is, what each
+> part does and why, and what is deliberately not built yet. Fifteen minutes.
+>
+> **Setting it up? Then [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md).**
 > It is the complete list: what each person installs, which MCP servers are shared and which
 > are per website, what the client has to supply, and how to check the setup before the first
 > run. `examples/worked-example/` is a complete filled-in site context.
