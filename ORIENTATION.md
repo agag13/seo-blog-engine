@@ -102,6 +102,7 @@ VERIFY list, and never silently passes.
 |---|---|
 | `intake` | The conversation before any work. Rewrite or fresh; then keyword, site, and **objective**. Waits for approval. This is a hard gate |
 | `research-chain` | Providers in a fallback order, **recording which one answered**. Never guesses a number when a provider fails |
+| `discourse-pull` | What people actually say, from the comment threads. Tavily finds them, Reddit gives the comments. Cached per site, so the same thread is never paid for twice |
 | `quality-gates` | The six scripts above, plus `doctor.py` |
 | `project-init` | Onboards a new website's context |
 | `brand-loader` | Loads BRAND/VOICE/project.yaml so writing obeys the site |
@@ -185,9 +186,6 @@ Named so they read as decisions rather than gaps. Full list in
 - **The skills are prompts, and prompt edits change behaviour silently.** Three
   `SKILL.md` files were edited with no way to verify the result. Practitioners report a
   one-line system-prompt change moving output quality from 84% to 52%.
-- **The discourse step is designed but not written.** Tavily finds the threads, the
-  Reddit API pulls the comment trees where the real objections live. About two cents an
-  article. The design is settled; the code is not there yet.
 - **`providers.py` is a config shape only.** Multi-credential rotation with a per-call
   log, wired into nothing. The MCP connectors carry their own auth, so there is nothing
   yet to rotate.

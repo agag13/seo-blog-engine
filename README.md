@@ -79,12 +79,13 @@ and reports a dead one rather than skipping the publish.
 0. **`intake`** — rewrite or fresh? keyword, site, objective. Confirm the plan, wait for approval →
 1. **`research-chain`** — providers in order, recording which one answered →
 2. **SERP gate** — reject on who ranks, before a word is written →
-3. Draft (`blog-write`/`blog-rewrite`, brand voice) →
-4. **`build_page`** — render the sibling HTML carrying the JSON-LD →
-5. **`quality-gates`** — voice, facts, links, three-surface schema. Exit 2 ends the run →
-6. Fact-check (`blog-factcheck` + `blog-researcher`) → the VERIFY + LAWYER lists →
-7. Polish (`blog-analyze`, `humanizer`, `entity-bold`, `blog-image`) →
-8. `cms-publish` → **draft** (never live).
+3. **`discourse-pull`** — what people actually say, from the comment threads →
+4. Draft (`blog-write`/`blog-rewrite`, brand voice) →
+5. **`build_page`** — render the sibling HTML carrying the JSON-LD →
+6. **`quality-gates`** — voice, facts, claims, links, three-surface schema. Exit 2 ends the run →
+7. Fact-check (`blog-factcheck` + `blog-researcher`) → the VERIFY + LAWYER lists →
+8. Polish (`blog-analyze`, `humanizer`, `entity-bold`, `blog-image`) →
+9. `cms-publish` → **draft** (never live).
 
 **GATE 1** the SEO owner reviews the flagged list (not the whole article). **GATE 2** the SEO
 owner approves go-live after the technical owner publishes to a temp URL. Then indexing +
@@ -116,6 +117,7 @@ than in nobody's memory.
 |---|---|
 | `intake` | the conversation before any work starts. Rewrite or fresh, keyword, site, **objective** |
 | `research-chain` | providers in a fallback order, recording **which one answered** |
+| `discourse-pull` | what people actually say. Tavily finds threads, Reddit gives the comments. Cached, so you pay once |
 | `quality-gates` | the five blocking scripts. SERP, voice, facts, links, schema |
 | `project-init` | onboard a new website's context |
 | `brand-loader` | load BRAND/VOICE/project.yaml so writing obeys the site |

@@ -14,6 +14,40 @@ What is connected, what answers, and what is broken in a way that waiting will n
 
 DataForSEO did most of the work on the reference account.
 
+### Reddit, for discourse research
+
+`api.redditapis.com`, bearer token, **$0.002 per read**. Verified by direct call.
+
+Three endpoints matter, and two of them have a trap in the parameter name:
+
+| Endpoint | Note |
+|---|---|
+| `/api/reddit/posts` | flat JSON, straightforward |
+| `/api/reddit/search` | the parameter is **`q`**, not `query`. **Always pass `t`** |
+| `/api/reddit/comments` | the parameter is **`permalink`**, not `id`. Returns Reddit's raw `{kind, data}` envelope, a different shape from the posts endpoint |
+
+**On `t`:** Reddit defaults the time window to `all`, so a relevance query returns
+years-old viral posts. A test that omitted it returned an r/AskHistorians survey and a
+car-accident thread for a query about Google search results. That was a calling error,
+not an API fault, and `discourse_pull.py` defaults to `t=year` so it cannot happen twice.
+
+The response carries `listing_status: complete | truncated | unknown`, and the docs say
+plainly not to treat `unknown` as the end of the data. That is the same honesty this
+engine applies to its own gates, and it is worth trusting.
+
+### X / GetXAPI, optional and off by default
+
+`api.getxapi.com/twitter/...`, bearer token, **$0.001 per read**, parameter **`q`**.
+There is also an MCP server: `claude mcp add getxapi npx -y @getxapi/mcp@latest`.
+
+**Leave it unconfigured unless a client needs it.** Tested on a topic query it returned
+13 posts, mostly automated "BREAKING NEWS" accounts, about one real opinion in five. A
+tweet is a reaction; the article needs the reasoning underneath it, and that is on Reddit.
+
+Where it does earn its cost is `get_mentions` against a **named account**. Entity
+monitoring, not topic research. For a reputation-management client that is a service they
+sell, not a content input, so it belongs in that client's config and nowhere else.
+
 ## Broken, and connected, which is the dangerous combination
 
 A connected-but-broken provider gets called by a naive run and returns nothing. Neither of

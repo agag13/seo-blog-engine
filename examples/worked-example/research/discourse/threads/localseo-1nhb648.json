@@ -1,0 +1,56 @@
+{
+ "permalink": "/r/localseo/comments/1nhb648/anyone_here_tried_removing_negative_articles_on/",
+ "title": "Anyone here tried removing negative articles on their own?",
+ "subreddit": "localseo",
+ "url": "https://reddit.com/r/localseo/comments/1nhb648/anyone_here_tried_removing_negative_articles_on/",
+ "upvotes": 10,
+ "created": "2025-09-15T03:24:12.000Z",
+ "comments": [
+  {
+   "body": "It’s possible but very difficult to do unless you’re highly proficient in ORM. A few years back, I had to retain an online reputation management firm and can indeed confirm that there are legitimate service providers out there who can “remove” content from the web. I say “remove” in quotation marks because they do not actually remove the content directly from the source (ie. the website). Doing so would require either the website owner’s cooperation (unlikely to be achieved unless very specific criteria are met) or hacking directly into the website to delete the content (which, if someone has the skillset to do, would never offer for a measly couple thousand dollars).\n\nInstead, what these firms actually do is just block the URL from appearing within specific search engines, also known as “de-tethering”. They do this by essentially tricking the Google algorithm into thinking that the content does not actually exist and/or is a duplicate. Once executed, finding the link through Google becomes effectively impossible as it no longer exists within the Google index. However, if you have the link saved, you can still access it and view the content by putting the URL directly into your browser. Therefore, these agencies aren’t really removing content directly from the source, they’re just reducing its accessibility and making it harder for people to find.\n\nThat’s not to say that it isn’t a valuable service nonetheless (I was personally quite happy with my article getting de-tethered from Google) but if you’re expecting all traces of the content to disappear completely, you’d probably be better off hiring a defamation attorney and applying legal pressure to force the publication to remove the content themselves. That’s the only real way to get rid of it completely in my experience.\n\nEDIT: I received some DMs from people asking how much I paid for de-tethering. The service ended up costing me about five figures but I also had more than just one link associated with my arrest. If you’re dealing with just a singular link, you’d probably pay significantly less. The firm I hired was called “Maximatic Media”, I found that they were the cheapest option amongst all of the major ORM players.",
+   "score": 7,
+   "author": "dinotatoes",
+   "objections": [
+    "pricing"
+   ]
+  },
+  {
+   "body": "I’ve tackled this a bit myself, I use an seocopilot tool to help prune and push down negative content. It doesn’t magically erase everything, but it makes the process way less tedious and helps keep the results moving in the right direction. Still takes some manual follow-up, but definitely better than doing it all by hand. Also it helps my site's overall performance and rank",
+   "score": 5,
+   "author": "Ambitious_Reply9078",
+   "objections": []
+  },
+  {
+   "body": "I do a lot do online rep mgt for clients ( companies and individuals). I can tell you that every situation is different, and needs to be handled differently. \n\nIt sounds like you’ve been working on getting the negative stuff removed. That’s great. I would definitely do that as a first step. \n\nBut there comes a point in token that there’s going to be not more you can do to get stuff completely removed. So you have to move on. \n\nYou now need to focus on the positive stuff and “building your brand” so to speak. Create websites, social profiles(that you’re constantly updating), pages like LinkedIn company pages, a crunchbase profile, video channels (YouTube and Vimeo), Instagram, Facebook page, X, bluesky, threads, profiles. That’s just a start. You need this positive stuff to push down the negative. That will happen if you are updating the content regularly.",
+   "score": 2,
+   "author": "billhartzer",
+   "objections": []
+  },
+  {
+   "body": "Been there - tried the manual outreach route for months and honestly got maybe one decent takedown after endless emails. What finally worked was when I stopped trying to do it all myself and used Reputation Zilla for the heavy legal stuff like DMCA notices, which I was never gonna draft right myself. The suppression tactics and basic removals are fine to DIY, but for actual article takedowns, having pros handle the legal demands was a game changer for me.",
+   "score": 2,
+   "author": "Sweaty-Ad1337",
+   "objections": []
+  },
+  {
+   "body": "I have seen it being sold as a service specially on forums like Swapd etc. There are def some underground ways to get it done. A friend of mine had to pay someone on swapd and got it removed very quickly. But yeah that’s cuz he desperately needed it gone, it all comes down to whether or not it’s worth it.",
+   "score": 2,
+   "author": "fuckyeah001",
+   "objections": []
+  },
+  {
+   "body": "For local SEO?",
+   "score": 1,
+   "author": "brightbeamseo",
+   "objections": []
+  },
+  {
+   "body": "Nice work taking proactive steps! I dont have a suggestion directly (becasue its different case by case), but for suppression tactics, I suggest improving rankings for positive pages using on-page SEO, quality backlinks, and fresh content. Optimizing your own content (e.g. blog or portfolio site) can help push down negative results over time. Try using an SEO Checker tool to strengthen those pages, better optimization = better visibility. Just keep in mind, it’ll take **consistent** effort, not instant wins.",
+   "score": 1,
+   "author": "Full-Lime-6215",
+   "objections": []
+  }
+ ],
+ "withheld": 4,
+ "listing_status": "unknown"
+}

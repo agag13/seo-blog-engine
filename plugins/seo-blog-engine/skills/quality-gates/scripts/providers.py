@@ -47,6 +47,8 @@ SPEC = {
     "ahrefs":     ("AHREFS_API_TOKEN", []),
     "tavily":     ("TAVILY_API_KEY", []),
     "moz":        ("MOZ_ACCESS_ID", ["MOZ_SECRET_KEY"]),
+    "redditapis": ("REDDITAPIS_KEY", []),
+    "getxapi":    ("GETXAPI_KEY", []),
 }
 MAX_SLOTS = 9
 

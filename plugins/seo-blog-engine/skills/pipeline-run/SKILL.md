@@ -52,7 +52,25 @@ volume-to-difficulty figure on the whole board.
 
 Exit 1 is a decision, not a veto. Surface the warnings and let the user decide.
 
-## 3. Draft
+## 3. Discourse, before a word is written
+
+```bash
+python3 discourse-pull/scripts/discourse_pull.py --slug <slug> --urls <reddit urls>
+```
+
+Find the threads with `tavily_search` restricted to `reddit.com`, then hand the
+permalinks to the script. It pulls the comment trees, caches them, and writes
+`research/DISCOURSE-<slug>.md`.
+
+**Read that file before drafting.** The SERP told you what Google rewards; this tells
+you what the reader believes and the words they use. It changes the opening, the
+headings, the FAQ and the CTA, not just a paragraph.
+
+About a cent an article, and often nothing at all when the threads are already cached
+from a related piece. Skip it only when the topic genuinely has no public discussion,
+and say so in the brief rather than leaving it unexplained.
+
+## 4. Draft
 
 `blog-write` for a fresh piece, `blog-rewrite` for a rewrite, in the site's brand voice.
 
@@ -63,7 +81,7 @@ block into two live articles.
 If the article carries a diagram, the information the diagram argues must also exist as
 prose or a table. **An SVG's content is invisible to answer engines.**
 
-## 4. Build the page
+## 5. Build the page
 
 The schema gate reads an HTML file, so one has to exist. Build it from the draft:
 
@@ -78,7 +96,7 @@ build cannot be pointed at a sibling article's file.
 
 Skipping this step is how the strongest gate in the engine ends up checking nothing.
 
-## 5. The enforcement gates
+## 6. The enforcement gates
 
 ```bash
 python3 quality-gates/scripts/run_gates.py \
@@ -100,7 +118,7 @@ something a person chose rather than something that happened.
 **Re-run the gates after the final edit, never before.** The three-surface FAQ match verified
 before the last edit means nothing after it.
 
-## 6. Fact-check and polish
+## 7. Fact-check and polish
 
 `blog-factcheck` with the `blog-researcher` agent. Split into auto-cleared, a **VERIFY** list,
 and a **LAWYER** list for topics in `project.yaml → gates.factcheck_required_for`.
@@ -112,7 +130,7 @@ not evidence.
 Then `blog-analyze`, `entity-bold`, and `blog-image` if images are enabled. These are
 advisory and they are allowed to be, because the blocking work already happened.
 
-## 7. Publish as a draft
+## 8. Publish as a draft
 
 `cms-publish`. Code-based site or WordPress, draft only, and check the MCP server connects
 before claiming a WordPress publish happened.
